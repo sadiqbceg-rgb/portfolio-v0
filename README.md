@@ -215,6 +215,25 @@ components.json      shadcn CLI config + Animate UI registry
 public/fonts/        Inter, Anton, Caveat (latin + latin-ext subsets)
 ```
 
+## Self-contained preview
+
+```bash
+npm run preview      # → preview/index.html
+```
+
+Produces a single HTML file with the CSS, JS and fonts all inlined as data
+URIs. It runs from anywhere with zero network requests — open it directly from
+disk, email it, or drop it on any static host — and React still hydrates, so
+the filters, mobile menu, scroll reveals, counters and star field all work.
+
+Useful for sharing a look at the site before you own a domain. Both the export
+(`.next-export/`) and the output (`preview/`) are generated, so both are
+gitignored; re-run the command after editing `site.ts`.
+
+One caveat if you embed the file somewhere that supplies its own `<html>` and
+`<body>`: React logs hydration error #418 and recovers by client-rendering.
+Harmless, and it never affects the site itself.
+
 ## Deploying
 
 Static and portable — any Node host or static platform works. On Vercel, import
