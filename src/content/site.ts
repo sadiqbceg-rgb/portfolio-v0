@@ -51,6 +51,15 @@ export const nav = {
  * single word you want italicised — one word, not more.
  * -------------------------------------------------------------------------*/
 export const hero = {
+  /**
+   * Hero backdrop:
+   *   'stars'   — Animate UI's parallax star field, drifting and tracking the
+   *               cursor. Interactive and alive.
+   *   'artwork' — the generated SVG cloud composition. Closer to the style
+   *               reference, which uses full-bleed cloud photography.
+   * Both are self-contained; swap the word and the hero changes.
+   */
+  background: 'stars' as 'stars' | 'artwork',
   eyebrow: '[Software Engineer · Available for work]',
   headline: [
     { text: 'I build software that feels', accent: false },
@@ -155,6 +164,31 @@ export const work = {
   subtitle:
     '[A line framing how you pick what to work on, or what these projects have in common.]',
   items: workItems,
+};
+
+/* ---------------------------------------------------------------------------
+ * STATS — the numbers count up when they scroll into view.
+ *
+ * `value` must be a number, not a string, for the counter to animate. Put any
+ * unit in `suffix` (e.g. '+', '%', 'M'). Keep this to three or four entries —
+ * a long row of numbers stops feeling like evidence and starts feeling like
+ * filler. Delete the section from src/app/page.tsx if you would rather not
+ * make claims in numbers.
+ * -------------------------------------------------------------------------*/
+export type Stat = {
+  value: number;
+  suffix: string;
+  label: string;
+  decimalPlaces?: number;
+};
+
+export const stats = {
+  items: [
+    { value: 6, suffix: '+', label: '[Years shipping software]' },
+    { value: 40, suffix: '+', label: '[Projects delivered]' },
+    { value: 2, suffix: 'M', label: '[Users reached]' },
+    { value: 99.9, suffix: '%', label: '[Uptime maintained]', decimalPlaces: 1 },
+  ] satisfies Stat[],
 };
 
 /* ---------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Reveal } from './Reveal';
 import { SectionHeader } from './SectionHeader';
 import { contact, identity } from '@/content/site';
 
@@ -41,11 +42,13 @@ export function Contact() {
   return (
     <section id="contact" className="py-section">
       <div className="shell flex flex-col gap-section">
-        <SectionHeader
-          eyebrow={contact.eyebrow}
-          title={contact.title}
-          subtitle={contact.subtitle}
-        />
+        <Reveal>
+          <SectionHeader
+            eyebrow={contact.eyebrow}
+            title={contact.title}
+            subtitle={contact.subtitle}
+          />
+        </Reveal>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_320px]">
           <div className="card-haze">

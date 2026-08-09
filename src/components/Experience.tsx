@@ -1,3 +1,4 @@
+import { Reveal } from './Reveal';
 import { SectionHeader } from './SectionHeader';
 import { experience } from '@/content/site';
 
@@ -8,7 +9,9 @@ export function Experience() {
   return (
     <section id="experience" className="py-section">
       <div className="shell flex flex-col gap-section">
-        <SectionHeader eyebrow={experience.eyebrow} title={experience.title} />
+        <Reveal>
+          <SectionHeader eyebrow={experience.eyebrow} title={experience.title} />
+        </Reveal>
 
         <ol className="flex flex-col">
           {experience.items.map((job) => (

@@ -116,6 +116,84 @@ photography. The UI chrome around them stays flat, as the style guide requires.
 
 Swap in real photography any time via the `image` field on a work item.
 
+## Animation (Animate UI)
+
+Motion comes from [Animate UI](https://animate-ui.com), installed the shadcn
+way. `components.json` registers the registry, so on your machine you can pull
+any additional component straight in:
+
+```bash
+npx shadcn@latest add @animate-ui/primitives-effects-slide
+```
+
+Components land in `src/components/animate-ui/` and are yours to edit — this is
+a copy-in distribution, not a package dependency.
+
+### What is installed
+
+| Component | Path | Used by |
+|---|---|---|
+| `fade` | `primitives/effects/fade.tsx` | `Reveal` |
+| `blur` | `primitives/effects/blur.tsx` | available |
+| `magnetic` | `primitives/effects/magnetic.tsx` | hero CTAs |
+| `tilt` | `primitives/effects/tilt.tsx` | work cards |
+| `splitting` | `primitives/texts/splitting.tsx` | available |
+| `counting-number` | `primitives/texts/counting-number.tsx` | `Stats` |
+| `stars` | `components/backgrounds/stars.tsx` | hero backdrop |
+
+Plus their dependencies: `primitives/animate/slot.tsx`,
+`src/hooks/use-is-in-view.ts`, `src/lib/get-strict-context.tsx`.
+
+The site uses **primitives** rather than Animate UI's styled components. The
+styled ones ship shadcn's own `new-york` tokens and would fight the design
+system defined in `globals.css`; primitives are unstyled animation wrappers, so
+the reference's look stays intact.
+
+### How motion is applied
+
+Deliberately restrained, in keeping with the reference's "visual quietness":
+
+- **[`Reveal`](src/components/Reveal.tsx)** is the single scroll entrance — a
+  14px rise and a fade, once per element. Every section uses it, so timing stays
+  consistent. Change it in one place to retune the whole site.
+- **Stats** count up when scrolled into view.
+- **Work cards** tilt 4° toward the cursor; **hero CTAs** are lightly magnetic.
+
+Two tuning notes, in case you wonder why the values differ from the library
+defaults:
+
+- The counter's default spring (`stiffness: 90, damping: 50`) takes about seven
+  seconds to settle on a decimal — long enough that a visitor scrolls past
+  mid-count. `Stats` uses a stiffer spring that lands in roughly one second.
+- List items (`<ul>`/`<ol>` children in Projects and Experience) are **not**
+  wrapped in `Reveal`. Wrapping them would put a `<div>` between the list and
+  its items and break list semantics for screen readers.
+
+### Reduced motion
+
+Every animated component checks `useReducedMotion()` and renders a static
+equivalent — the star field falls back to the SVG artwork, stats render their
+final value immediately, cards do not tilt.
+
+This is handled in JavaScript on purpose. Motion animates via JS, so the
+`prefers-reduced-motion` block in `globals.css` — which only neutralises CSS
+transitions and animations — cannot reach it. Reduced-motion paths also skip
+the hidden initial state entirely, so content can never be stuck invisible if an
+intersection observer never fires.
+
+### Cost
+
+Motion adds about 58 kB to first load (105 kB → 163 kB). If you want that back,
+set `hero.background` to `'artwork'`, drop `Stats` from `page.tsx`, and replace
+`Reveal` with a CSS-only entrance — the design does not depend on any of it.
+
+### Switching the hero backdrop
+
+`hero.background` in `src/content/site.ts` takes `'stars'` (the Animate UI
+parallax star field, current default) or `'artwork'` (the generated SVG clouds).
+The cloud artwork is closer to the style reference, which uses full-bleed cloud
+photography; the star field is more interactive. One word, no other changes.
+
 ## Project structure
 
 ```
@@ -127,7 +205,13 @@ src/
     page.tsx         Section composition — reorder or delete sections here
   content/
     site.ts          ← all editable content
-  components/        One file per section, plus Artwork.tsx and SectionHeader.tsx
+  components/
+    *.tsx            One file per section, plus Artwork.tsx, SectionHeader.tsx
+    Reveal.tsx       Shared scroll entrance
+    animate-ui/      Animate UI components (copied in, yours to edit)
+  hooks/             use-is-in-view (Animate UI dependency)
+  lib/               cn utility, get-strict-context
+components.json      shadcn CLI config + Animate UI registry
 public/fonts/        Inter, Anton, Caveat (latin + latin-ext subsets)
 ```
 

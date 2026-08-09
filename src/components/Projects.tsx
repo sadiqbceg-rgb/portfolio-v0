@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { Reveal } from './Reveal';
 import { SectionHeader } from './SectionHeader';
 import { projects } from '@/content/site';
 
@@ -32,11 +33,13 @@ export function Projects() {
   return (
     <section id="projects" className="py-section">
       <div className="shell flex flex-col gap-section">
-        <SectionHeader
-          eyebrow={projects.eyebrow}
-          title={projects.title}
-          subtitle={projects.subtitle}
-        />
+        <Reveal>
+          <SectionHeader
+            eyebrow={projects.eyebrow}
+            title={projects.title}
+            subtitle={projects.subtitle}
+          />
+        </Reveal>
 
         <div
           className="flex flex-wrap justify-center gap-2"
