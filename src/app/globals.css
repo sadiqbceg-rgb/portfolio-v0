@@ -1,0 +1,329 @@
+@import 'tailwindcss';
+@import './fonts.css';
+
+/* ==========================================================================
+   DESIGN TOKENS
+   Sourced verbatim from the style reference (theme.css / tokens.json).
+   Change a value here and it propagates through the entire site.
+   ========================================================================== */
+@theme {
+  /* --- Colors ------------------------------------------------------------
+     Whiteout      Primary text on dark surfaces, borders, hairline strokes
+     Haze          Card surfaces, inputs, subtle fills on dark backgrounds
+     Ink           Text and borders on light surfaces
+     Black Void    Base canvas, nav borders, link underlines
+     Twilight Blue Heading text on dark backgrounds — the only chromatic text
+     Signal Blue   Links, tags, emphasized phrases. NEVER a button fill.
+  ------------------------------------------------------------------------ */
+  --color-whiteout: #ffffff;
+  --color-haze: #f5f5f5;
+  --color-ink: #1b1b1b;
+  --color-black-void: #000000;
+  --color-twilight-blue: #426188;
+  --color-signal-blue: #2b7fff;
+
+  /* --- Typography --------------------------------------------------------
+     The reference ships four cuts of a proprietary family named "Control".
+     Each maps to the open substitute named in the style guide so the site
+     renders faithfully without licensed files. Swap the first name in each
+     stack for the real font if you license it — nothing else needs to change.
+  ------------------------------------------------------------------------ */
+  --font-control: 'Inter', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-control-compressed: 'Anton', 'Inter', ui-sans-serif, system-ui,
+    sans-serif;
+  --font-control-cursive: 'Caveat', 'Inter', ui-sans-serif, system-ui,
+    cursive;
+  --font-control-tnt: 'Inter', ui-sans-serif, system-ui, -apple-system,
+    sans-serif;
+
+  /* --- Type scale --------------------------------------------------------
+     Role         Size    Line height
+     caption      13px    1.5
+     body         16px    1.5
+     subheading   20px    1.4
+     heading      32px    1.1
+     heading-lg   56px    1.0
+     display      259px   0.85
+     Display and heading-lg are fluid so the poster-scale type survives
+     small viewports without horizontal overflow.
+  ------------------------------------------------------------------------ */
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.5;
+  --text-body: 1rem;
+  --text-body--line-height: 1.5;
+  --text-subheading: 1.25rem;
+  --text-subheading--line-height: 1.4;
+  --text-heading: clamp(1.75rem, 1.2rem + 2.4vw, 2rem);
+  --text-heading--line-height: 1.1;
+  --text-heading-lg: clamp(2.25rem, 1.2rem + 4.6vw, 3.5rem);
+  --text-heading-lg--line-height: 1;
+  --text-display: clamp(3.5rem, -0.5rem + 17.5vw, 16.1875rem);
+  --text-display--line-height: 0.85;
+
+  /* --- Border radius -----------------------------------------------------
+     Do not introduce new radii. inputs 4 / buttons 8 / images 11 / cards 12
+  ------------------------------------------------------------------------ */
+  --radius-input: 4px;
+  --radius-button: 8px;
+  --radius-image: 11px;
+  --radius-card: 12px;
+  --radius-pill: 9999px;
+
+  /* --- Layout ------------------------------------------------------------
+     Base spacing unit is 4px (Tailwind's default), density comfortable.
+  ------------------------------------------------------------------------ */
+  --spacing-page: 1150px; /* page max-width for text and card grids */
+  --spacing-nav: 72px; /* navigation bar height */
+  --spacing-section: 48px; /* section gap */
+  --spacing-card: 20px; /* card padding */
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Keep anchored sections clear of the fixed nav bar. */
+    scroll-padding-top: var(--spacing-nav);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-black-void);
+    color: var(--color-whiteout);
+    font-family: var(--font-control);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    font-weight: 500; /* Control 500 carries body, nav, buttons, links */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Long-form prose drops to 400 — the one place the reference allows it. */
+  .prose-longform {
+    font-weight: 400;
+  }
+
+  ::selection {
+    background-color: var(--color-signal-blue);
+    color: var(--color-whiteout);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal-blue);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   COMPONENT PRIMITIVES
+   Mirrors the component inventory in the style reference. Every rule below
+   corresponds to a named component in DESIGN.md.
+   ========================================================================== */
+@layer components {
+  /* Page shell — 1150px for text and card grids. Full-bleed sections opt out. */
+  .shell {
+    width: 100%;
+    max-width: var(--spacing-page);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  /* Ghost Navigation Button — transparent fill on dark canvas. */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: transparent;
+    color: var(--color-whiteout);
+    border: 1px solid var(--color-whiteout);
+    border-radius: var(--radius-button);
+    padding: 10px 16px;
+    font-size: var(--text-caption);
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+
+  .btn-ghost:hover {
+    background-color: var(--color-whiteout);
+    color: var(--color-ink);
+  }
+
+  /* Solid Light Button — secondary action on light cards. */
+  .btn-haze {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: var(--color-haze);
+    color: var(--color-ink);
+    border: 1px solid var(--color-ink);
+    border-radius: var(--radius-button);
+    padding: 8px 16px;
+    font-size: var(--text-caption);
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+
+  .btn-haze:hover {
+    background-color: var(--color-ink);
+    color: var(--color-haze);
+  }
+
+  /* Pill Toggle Button — segmented control / filter chip. The ONLY pill. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: var(--text-caption);
+    font-weight: 500;
+    line-height: 1.4;
+    background-color: color-mix(in oklab, var(--color-black-void) 10%, transparent);
+    color: var(--color-whiteout);
+    border: 1px solid color-mix(in oklab, var(--color-whiteout) 25%, transparent);
+    transition:
+      background-color 200ms ease,
+      color 200ms ease,
+      border-color 200ms ease;
+  }
+
+  .pill:hover {
+    border-color: var(--color-whiteout);
+  }
+
+  .pill[aria-pressed='true'] {
+    background-color: var(--color-haze);
+    color: var(--color-ink);
+    border-color: var(--color-haze);
+  }
+
+  /* Underline Link — underline is the affordance, never a colour fill. */
+  .link-underline {
+    display: inline-block;
+    background-color: transparent;
+    color: var(--color-signal-blue);
+    padding-inline: 8px;
+    border-bottom: 2px solid currentColor;
+    font-weight: 500;
+    transition: opacity 200ms ease;
+  }
+
+  .link-underline:hover {
+    opacity: 0.7;
+  }
+
+  /* On light surfaces the underline link switches to Ink. */
+  .link-underline-ink {
+    color: var(--color-ink);
+  }
+
+  /* Haze Card — light island on the dark photographic canvas. No shadow. */
+  .card-haze {
+    background-color: var(--color-haze);
+    color: var(--color-ink);
+    border-radius: var(--radius-card);
+    padding: var(--spacing-card);
+  }
+
+  /* Image Card with Radius — media container, transparent, no padding. */
+  .card-image {
+    background-color: transparent;
+    border-radius: var(--radius-image);
+    overflow: hidden;
+  }
+
+  /* Text Input — minimal chrome, relies on background contrast. */
+  .input {
+    width: 100%;
+    background-color: var(--color-haze);
+    color: var(--color-ink);
+    border: 1px solid rgb(0 0 0 / 0.1);
+    border-radius: var(--radius-input);
+    padding: 10px;
+    font-family: var(--font-control);
+    font-size: var(--text-body);
+    font-weight: 500;
+  }
+
+  .input::placeholder {
+    color: color-mix(in oklab, var(--color-ink) 45%, transparent);
+  }
+
+  /* Compressed Display Headline — poster scale, uppercase, bleeds to edges. */
+  .display-headline {
+    font-family: var(--font-control-compressed);
+    font-weight: 900;
+    font-size: var(--text-display);
+    line-height: 0.85;
+    text-transform: uppercase;
+    color: var(--color-whiteout);
+    letter-spacing: -0.01em;
+  }
+
+  /* Cursive accent — one handwritten word inside an upright headline.
+   * No font-style: italic here. Caveat is already a slanted script, so asking
+   * for italic would make the browser synthesise a second skew on top of it. */
+  .accent-cursive {
+    font-family: var(--font-control-cursive);
+    font-weight: 600;
+    /* Caveat's x-height runs well below Inter's at the same px, so it needs a
+     * size bump to sit optically level with the words either side of it. */
+    font-size: 1.32em;
+    line-height: 0.8;
+    letter-spacing: 0.005em;
+  }
+
+  /* Signal Blue, darkened for light surfaces.
+   *
+   * The raw token clears AA on the black canvas (5.6:1) but only reaches
+   * ~3.4:1 on a Haze card — short of the 4.5:1 body threshold. Text sitting on
+   * Haze uses this darkened mix so the blue accent survives without failing
+   * contrast. Derived from the token, so re-theming still flows through.
+   */
+  .text-signal-on-light {
+    color: color-mix(in oklab, var(--color-signal-blue) 68%, var(--color-ink));
+  }
+
+  /* Twilight Blue, lightened for small text.
+   *
+   * The raw token (#426188) sits at ~3.2:1 on the black canvas. That clears
+   * WCAG AA for large text (3:1) so the big section headings use it as-is, but
+   * it fails the 4.5:1 body threshold. Eyebrows and 16px labels use this
+   * lightened mix instead — same hue, same family, legible. It is derived from
+   * the token rather than hard-coded, so re-theming still flows through.
+   */
+  .text-twilight-soft {
+    color: color-mix(in oklab, var(--color-twilight-blue) 45%, var(--color-whiteout));
+  }
+
+  /* Hairline divider — surfaces separate with 1px strokes, never shadows. */
+  .hairline {
+    border-color: color-mix(in oklab, var(--color-whiteout) 15%, transparent);
+  }
+}

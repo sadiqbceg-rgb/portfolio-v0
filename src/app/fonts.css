@@ -1,0 +1,99 @@
+/* ============================================================================
+ * FONTS — self-hosted.
+ *
+ * The reference specifies a proprietary family called "Control" in four cuts.
+ * These are the open substitutes named in the style guide:
+ *
+ *   Control            → Inter    (variable, 100–900)
+ *   Control TNT        → Inter    (same family, used upright for headlines)
+ *   Control Compressed → Anton    (single heavy condensed cut)
+ *   Control Cursive    → Caveat   (variable handwriting, 400–700)
+ *
+ * Files live in /public/fonts and are served from your own origin — no Google
+ * Fonts request, no third-party CDN, no layout shift from a blocked stylesheet.
+ * If you license the real Control family, drop the woff2 files in the same
+ * folder, swap the src paths below, and rename the families. Nothing else in
+ * the codebase refers to a font file.
+ *
+ * Each family ships a `latin` and a `latin-ext` subset. The unicode-range on
+ * each face means a visitor whose page contains only basic Latin never
+ * downloads the extended file.
+ * ==========================================================================*/
+
+/* --- Inter (Control / Control TNT) --------------------------------------- */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900; /* variable font — one file covers every weight */
+  font-display: swap;
+  src: url('/fonts/inter-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* --- Anton (Control Compressed) ------------------------------------------
+ * Anton ships a single cut. Declaring the weight range 100–900 against that
+ * one file lets the design tokens keep asking for weight 900 — as the
+ * reference specifies — while the browser renders Anton's true drawn weight
+ * instead of smearing it with a synthetic bold.
+ * ------------------------------------------------------------------------ */
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/anton-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Anton';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/anton-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* --- Caveat (Control Cursive) --------------------------------------------
+ * Caveat has no true italic. It is already a slanted handwriting face, so the
+ * accent style deliberately does NOT request font-style: italic — that would
+ * only add a synthetic skew on top of a script that is cursive by design.
+ * ------------------------------------------------------------------------ */
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/caveat-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/caveat-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF,
+    U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020,
+    U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
