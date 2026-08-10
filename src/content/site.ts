@@ -52,10 +52,12 @@ export const nav = {
 
 export const hero = {
   /**
-   * Backdrop: 'stars' (interactive parallax field) or any generated canvas
-   * composition — 'contour', 'flow', 'lattice', 'orbit'.
+   * Backdrop:
+   *   '3d'      — scroll-driven Three.js wireframe (loads Three only if chosen)
+   *   'stars'   — interactive parallax star field
+   *   'contour' | 'flow' | 'lattice' | 'orbit' — generated canvas compositions
    */
-  background: 'contour' as 'stars' | ArtVariant,
+  background: '3d' as '3d' | 'stars' | ArtVariant,
 
   eyebrow: 'ML Engineer · Product Manager · Developer',
 

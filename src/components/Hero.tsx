@@ -1,10 +1,18 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useReducedMotion } from 'motion/react';
 import { StarsBackground } from '@/components/animate-ui/components/backgrounds/stars';
 import { Magnetic } from '@/components/animate-ui/primitives/effects/magnetic';
 import { Atmosphere, type ArtVariant } from './Artwork';
 import { hero } from '@/content/site';
+
+/* Three.js is ~150kB gzipped. Loading it dynamically keeps it out of the main
+ * bundle unless hero.background is set to '3d', so every other backdrop costs
+ * nothing. ssr:false because the scene needs a real canvas to exist first. */
+const HeroScene = dynamic(() => import('./HeroScene').then((m) => m.HeroScene), {
+  ssr: false,
+});
 
 /* Hero — full-bleed backdrop, but the content is a left-aligned two-column
  * composition rather than a centred stack: headline and actions on the left,
@@ -14,14 +22,27 @@ import { hero } from '@/content/site';
  */
 export function Hero() {
   const reducedMotion = useReducedMotion();
-  const useStars = hero.background === 'stars' && !reducedMotion;
+  const backdrop = hero.background;
 
   return (
     <section
       id="top"
       className="relative flex min-h-svh items-center overflow-hidden pt-nav"
     >
-      {useStars ? (
+      {backdrop === '3d' ? (
+        <>
+          <HeroScene />
+          {/* Scrim: the wireframe runs bright where it crosses the headline,
+              so the text needs a floor under it to hold its contrast. */}
+          <div
+            className="absolute inset-0 -z-10"
+            style={{
+              background:
+                'linear-gradient(100deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.86) 34%, rgba(0,0,0,0.42) 58%, rgba(0,0,0,0.30) 100%)',
+            }}
+          />
+        </>
+      ) : backdrop === 'stars' && !reducedMotion ? (
         <StarsBackground
           className="absolute inset-0 -z-10"
           starColor="#ffffff"
@@ -29,7 +50,10 @@ export function Hero() {
           speed={60}
         />
       ) : (
-        <Atmosphere uid="hero" variant={hero.background as ArtVariant} />
+        <Atmosphere
+          uid="hero"
+          variant={(backdrop === 'stars' ? 'contour' : backdrop) as ArtVariant}
+        />
       )}
 
       <div className="shell pointer-events-none w-full py-20">
