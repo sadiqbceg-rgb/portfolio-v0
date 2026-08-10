@@ -77,6 +77,23 @@
   --spacing-nav: 72px; /* navigation bar height */
   --spacing-section: 48px; /* section gap */
   --spacing-card: 20px; /* card padding */
+
+  /* --- Phase 1: choreography tokens -------------------------------------
+     Additive only. No existing token changes value, so nothing already
+     built can regress.
+  ---------------------------------------------------------------------- */
+
+  /* The single easing for entrances. Every reveal in the site uses this, so
+     timing reads as one system rather than per-component guesswork. */
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Taller rhythm for the cinematic sections. --spacing-section (48px) stays
+     for dense content; this is for sections that need to breathe. */
+  --spacing-section-lg: 120px;
+
+  /* Alias of Haze, named for its role rather than its colour, so the light
+     inversion panel reads as intentional in the markup. */
+  --color-surface-light: #f5f5f5;
 }
 
 /* ==========================================================================
@@ -91,6 +108,11 @@
   }
 
   body {
+    /* Several scroll-linked transforms translate elements horizontally. Without
+       this a sub-pixel overflow can raise a horizontal scrollbar on some
+       Windows/Chrome configurations. `clip` rather than `hidden` because
+       `hidden` on body would break `position: sticky` descendants. */
+    overflow-x: clip;
     background-color: var(--color-black-void);
     color: var(--color-whiteout);
     font-family: var(--font-control);
@@ -325,5 +347,49 @@
   /* Hairline divider — surfaces separate with 1px strokes, never shadows. */
   .hairline {
     border-color: color-mix(in oklab, var(--color-whiteout) 15%, transparent);
+  }
+
+  /* ---- Phase 1: choreography utilities --------------------------------- */
+
+  /* Micro-label. The bracket pair is drawn with pseudo-elements so screen
+     readers never announce "left paren" around every section title. */
+  .eyebrow {
+    font-size: var(--text-caption);
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--color-twilight-blue) 45%, var(--color-whiteout));
+  }
+
+  .eyebrow-bracketed::before {
+    content: '( ';
+  }
+
+  .eyebrow-bracketed::after {
+    content: ' )';
+  }
+
+  /* Line mask for clip-style text reveals. The inner element translates from
+     below and this hides it until it arrives. */
+  .reveal-line {
+    display: block;
+    overflow: hidden;
+  }
+
+  /* Sticky media frame for the work sequence. Centres the frame on the
+     viewport midline so the copy column reads against it. */
+  .sticky-media {
+    position: sticky;
+    top: calc(50vh - 28vh);
+  }
+
+  /* Radial glow for the closing CTA. One element, GPU-composited, no filter. */
+  .glow-radial {
+    background: radial-gradient(
+      60% 55% at 50% 45%,
+      color-mix(in oklab, var(--color-signal-blue) 12%, transparent) 0%,
+      transparent 70%
+    );
   }
 }
