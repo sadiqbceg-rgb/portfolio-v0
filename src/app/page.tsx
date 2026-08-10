@@ -5,7 +5,6 @@ import { Footer } from '@/components/Footer';
 import { Hero } from '@/components/Hero';
 import { Intro } from '@/components/Intro';
 import { Nav } from '@/components/Nav';
-import { Projects } from '@/components/Projects';
 import { Skills } from '@/components/Skills';
 import { Statement } from '@/components/Statement';
 import { Work } from '@/components/Work';
@@ -28,7 +27,6 @@ export default function Home() {
         <Intro />
         <Work />
         <Statement />
-        <Projects />
         <Experience />
         <Skills />
         <About />

@@ -55,7 +55,7 @@ export function TextReveal({
   delay?: number;
   /** Milliseconds between consecutive lines. */
   stagger?: number;
-  as?: 'span' | 'div' | 'h1' | 'h2';
+  as?: 'span' | 'div' | 'h1' | 'h2' | 'h3';
   once?: boolean;
 }) {
   const reduced = useReducedMotion();
