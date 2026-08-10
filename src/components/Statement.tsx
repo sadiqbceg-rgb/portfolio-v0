@@ -9,7 +9,7 @@ export function Statement() {
     <section className="relative overflow-hidden py-24">
       <Atmosphere uid="statement" variant="glass" />
 
-      <div className="flex flex-col items-center gap-8 px-4">
+      <div className="flex flex-col items-center gap-10 px-4">
         <h2 className="display-headline text-center">
           {statement.lines.map((line) => (
             <span key={line} className="block">
@@ -19,7 +19,7 @@ export function Statement() {
         </h2>
 
         {statement.note ? (
-          <p className="prose-longform text-body max-w-[46ch] text-center text-whiteout/70">
+          <p className="prose-longform text-body max-w-[52ch] text-center text-whiteout/70">
             {statement.note}
           </p>
         ) : null}

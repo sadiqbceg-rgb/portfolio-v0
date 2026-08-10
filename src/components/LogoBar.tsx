@@ -1,24 +1,23 @@
 import { logoBar } from '@/content/site';
 
-/* Logo Bar Row — single row of monochrome wordmarks on the dark canvas,
- * 32px column gap / 48px row gap, rendered in semi-transparent white.
+/* Logo bar — a single left-aligned row of monochrome wordmarks.
  *
- * These are text wordmarks so the site ships with no image dependencies. To use
- * real logos, replace the <span> with an <img src="/logos/name.svg" /> and keep
- * the opacity classes — monochrome white is the reference's treatment.
+ * Text wordmarks keep the site free of image dependencies. To use real logos,
+ * swap the <li> contents for <img src="/logos/name.svg" /> and keep the
+ * opacity treatment — monochrome white is the reference's handling.
  */
 export function LogoBar() {
   return (
-    <section className="border-y hairline py-section">
-      <div className="shell flex flex-col items-center gap-8">
-        <p className="text-caption uppercase tracking-[0.18em] text-whiteout/50">
+    <section className="py-section">
+      <div className="shell flex flex-col gap-6 border-t hairline pt-6 sm:flex-row sm:items-baseline sm:gap-12">
+        <p className="text-caption shrink-0 uppercase tracking-[0.16em] text-whiteout/55">
           {logoBar.caption}
         </p>
-        <ul className="flex flex-wrap items-center justify-center gap-x-8 gap-y-12">
+        <ul className="flex flex-wrap items-baseline gap-x-8 gap-y-3">
           {logoBar.logos.map((logo) => (
             <li
               key={logo}
-              className="font-control-tnt text-subheading text-whiteout/55 transition-opacity hover:text-whiteout"
+              className="font-control-tnt text-subheading text-whiteout/60"
             >
               {logo}
             </li>

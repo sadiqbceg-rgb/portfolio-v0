@@ -1,43 +1,51 @@
 import { Artwork } from './Artwork';
+import { Reveal } from './Reveal';
+import { SectionHeader } from './SectionHeader';
 import { about, identity } from '@/content/site';
 
-/* About — two-column split: long-form copy at 400 weight beside an Image Card.
- * This is the one place the style guide allows body text to drop below 500.
+/* About — long-form copy at 400 weight beside a portrait slot.
+ * This is the one place the style guide allows body text below weight 500.
  */
 export function About() {
   return (
     <section id="about" className="py-section">
-      <div className="shell grid grid-cols-1 items-center gap-10 md:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          <p className="text-subheading text-twilight-soft">{about.eyebrow}</p>
-          <h2 className="font-control-tnt text-heading-lg text-whiteout">
-            {about.title}
-          </h2>
-          {about.paragraphs.map((paragraph, i) => (
-            <p
-              key={i}
-              className="prose-longform text-body max-w-[56ch] text-whiteout/75"
-            >
-              {paragraph}
-            </p>
-          ))}
-          <p className="text-caption pt-2 text-whiteout/50">
-            {identity.location}
-          </p>
-        </div>
+      <div className="shell flex flex-col gap-12">
+        <Reveal>
+          <SectionHeader eyebrow={about.eyebrow} title={about.title} />
+        </Reveal>
 
-        <div className="card-image aspect-[4/5] w-full">
-          {about.portrait ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={about.portrait}
-              alt={about.portraitAlt}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <Artwork variant="glass" uid="about" />
-          )}
-        </div>
+        <Reveal>
+          <div className="grid grid-cols-1 gap-x-12 gap-y-10 md:grid-cols-[minmax(0,1fr)_18rem] md:items-start">
+            <div className="flex flex-col gap-5">
+              {about.paragraphs.map((paragraph, i) => (
+                <p
+                  key={i}
+                  className="prose-longform text-body max-w-[62ch] text-whiteout/75"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <div className="card-image aspect-[4/5] w-full">
+                {about.portrait ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={about.portrait}
+                    alt={about.portraitAlt}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Artwork variant="glass" uid="about" />
+                )}
+              </div>
+              <p className="text-caption text-whiteout/50">
+                {identity.location}
+              </p>
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

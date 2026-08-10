@@ -41,7 +41,7 @@ export function Contact() {
 
   return (
     <section id="contact" className="py-section">
-      <div className="shell flex flex-col gap-section">
+      <div className="shell flex flex-col gap-12">
         <Reveal>
           <SectionHeader
             eyebrow={contact.eyebrow}
@@ -50,7 +50,7 @@ export function Contact() {
           />
         </Reveal>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_320px]">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_18rem] md:items-start">
           <div className="card-haze">
             <form onSubmit={onSubmit} className="flex flex-col gap-4">
               <fieldset disabled={!live} className="flex flex-col gap-4">
@@ -117,8 +117,8 @@ export function Contact() {
             ) : null}
           </div>
 
-          <div className="flex h-fit flex-col gap-4 rounded-card border hairline p-card">
-            <p className="text-caption text-whiteout/50">Direct</p>
+          <div className="flex h-fit flex-col gap-4 border-t hairline pt-6">
+            <p className="text-caption uppercase tracking-[0.14em] text-whiteout/55">Direct</p>
             <a
               href={`mailto:${identity.email}`}
               className="link-underline self-start text-body"
@@ -126,7 +126,7 @@ export function Contact() {
               {identity.email}
             </a>
 
-            <p className="text-caption pt-4 text-whiteout/50">Elsewhere</p>
+            <p className="text-caption pt-4 uppercase tracking-[0.14em] text-whiteout/55">Elsewhere</p>
             <ul className="flex flex-col items-start gap-3">
               {contact.socials.map((social) => (
                 <li key={social.label}>

@@ -5,22 +5,21 @@ import { Reveal } from './Reveal';
 import { SectionHeader } from './SectionHeader';
 import { projects } from '@/content/site';
 
-/* Projects — Pill Toggle Buttons as filter chips above a three-column grid.
- * Pills are the only place the design permits a fully rounded shape.
+/* Projects — pill filters (the only fully rounded shape the design allows)
+ * above a three-column grid of hairline-topped entries.
  *
- * Filters derive from the tags used in src/content/site.ts, so adding a project
- * with a new tag adds its chip automatically — there is no second list to keep
- * in sync.
+ * Filters derive from the tags used in src/content/site.ts, so adding a
+ * project with a new tag adds its chip automatically.
  */
 const ALL = 'All';
 
 export function Projects() {
   const [active, setActive] = useState(ALL);
 
-  const filters = useMemo(() => {
-    const tags = projects.items.map((p) => p.tag);
-    return [ALL, ...Array.from(new Set(tags))];
-  }, []);
+  const filters = useMemo(
+    () => [ALL, ...Array.from(new Set(projects.items.map((p) => p.tag)))],
+    [],
+  );
 
   const visible = useMemo(
     () =>
@@ -32,7 +31,7 @@ export function Projects() {
 
   return (
     <section id="projects" className="py-section">
-      <div className="shell flex flex-col gap-section">
+      <div className="shell flex flex-col gap-12">
         <Reveal>
           <SectionHeader
             eyebrow={projects.eyebrow}
@@ -42,7 +41,7 @@ export function Projects() {
         </Reveal>
 
         <div
-          className="flex flex-wrap justify-center gap-2"
+          className="flex flex-wrap gap-2"
           role="group"
           aria-label="Filter projects by category"
         >
@@ -59,33 +58,30 @@ export function Projects() {
           ))}
         </div>
 
-        <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {visible.map((project, i) => (
+        <ul className="grid grid-cols-1 gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
+          {visible.map((project) => (
             <li
-              key={`${project.name}-${i}`}
-              className="flex flex-col gap-3 rounded-card border hairline p-card transition-colors hover:border-whiteout/40"
+              key={project.name}
+              className="flex flex-col gap-3 border-t hairline pt-5"
             >
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="font-control-tnt text-subheading text-whiteout">
                   {project.name}
                 </h3>
-                <span className="text-caption text-whiteout/50">
+                <span className="text-caption tabular-nums text-whiteout/55">
                   {project.year}
                 </span>
               </div>
 
-              <p className="prose-longform text-body text-whiteout/70">
+              <p className="prose-longform text-body text-whiteout/65">
                 {project.description}
               </p>
 
-              <div className="mt-auto flex items-center justify-between gap-3 pt-2">
+              <div className="mt-auto flex items-center justify-between gap-3 pt-3">
                 <span className="text-caption text-twilight-soft">
                   {project.tag}
                 </span>
-                <a
-                  href={project.href}
-                  className="link-underline text-caption"
-                >
+                <a href={project.href} className="link-underline text-caption">
                   View
                 </a>
               </div>

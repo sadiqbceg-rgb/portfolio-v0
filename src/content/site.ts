@@ -1,42 +1,42 @@
 /* ============================================================================
  * SITE CONTENT — edit everything here.
  *
- * This file is the only place you need to touch to make the site yours.
- * Every string, link, project and job below is rendered by the components in
- * src/components. Nothing is hard-coded in the markup.
+ * ⚠ THIS IS SAMPLE DATA, NOT YOUR RÉSUMÉ.
  *
- * Placeholders are marked with [] so you can find what's left:
- *   grep -rn "\[" src/content/site.ts
+ * Every name, company, project, metric and date below is invented, so the
+ * design can be judged with realistic copy in place instead of [placeholders].
+ * Replace it with your own before the site goes anywhere public — none of it
+ * is true of you, and some of it (the metrics especially) reads as a claim.
+ *
+ * Nothing is hard-coded in the markup; this file is the whole content layer.
  * ==========================================================================*/
 
 /* ---------------------------------------------------------------------------
  * IDENTITY
  * -------------------------------------------------------------------------*/
 export const identity = {
-  /** Shown in the nav wordmark and the <title>. */
-  name: '[Your Name]',
-  /** Short wordmark for the nav — initials or a compact form of your name. */
-  wordmark: '[YN]',
-  /** One-line role, used in metadata and the footer. */
-  role: '[Software Engineer]',
-  location: '[City, Country]',
-  email: '[you@example.com]',
-  /** Used for canonical URLs and Open Graph. No trailing slash. */
+  name: 'Sadiq Iqbal',
+  /** Compact wordmark for the nav. */
+  wordmark: 'SI',
+  role: 'Backend & Platform Engineer',
+  location: 'Bengaluru, India',
+  email: 'hello@example.com',
+  /** Canonical URL for metadata. No trailing slash. */
   url: 'https://example.com',
+  /** Shown in the hero meta rail. */
+  availability: 'Open to senior backend roles — from March',
 };
 
 /* ---------------------------------------------------------------------------
  * NAVIGATION
- * `href` values starting with # scroll to the section with that id.
  * -------------------------------------------------------------------------*/
 export const nav = {
   links: [
     { label: 'Work', href: '#work' },
     { label: 'Projects', href: '#projects' },
     { label: 'Experience', href: '#experience' },
-    { label: 'Skills', href: '#skills' },
+    { label: 'About', href: '#about' },
   ],
-  /** Right-aligned ghost buttons. Keep to two — the reference uses two. */
   actions: [
     { label: 'Résumé', href: '/resume.pdf', external: true },
     { label: 'Get in touch', href: '#contact', external: false },
@@ -44,59 +44,74 @@ export const nav = {
 };
 
 /* ---------------------------------------------------------------------------
- * HERO — the full-bleed atmospheric opener.
+ * HERO
  *
- * The headline is split into parts so one word can carry the cursive italic
- * accent, exactly as the reference does with "AI". Set `accent: true` on the
- * single word you want italicised — one word, not more.
+ * The headline is split into parts so one word can carry the handwritten cut,
+ * the way the style reference italicises a single word. Set `accent: true` on
+ * exactly one — a second one kills the effect.
  * -------------------------------------------------------------------------*/
 export const hero = {
   /**
-   * Hero backdrop:
-   *   'stars'   — Animate UI's parallax star field, drifting and tracking the
-   *               cursor. Interactive and alive.
-   *   'artwork' — the generated SVG cloud composition. Closer to the style
-   *               reference, which uses full-bleed cloud photography.
-   * Both are self-contained; swap the word and the hero changes.
+   * Backdrop:
+   *   'stars'   — Animate UI's parallax star field, tracks the cursor.
+   *   'artwork' — generated SVG cloud composition, closer to the reference.
    */
   background: 'stars' as 'stars' | 'artwork',
-  eyebrow: '[Software Engineer · Available for work]',
   headline: [
-    { text: 'I build software that feels', accent: false },
-    { text: 'effortless', accent: true },
-    { text: 'to use.', accent: false },
+    { text: 'I build the systems', accent: false },
+    { text: 'other', accent: true },
+    { text: 'engineers build on.', accent: false },
   ],
   subhead:
-    '[One or two sentences on what you do and who you do it for. Keep it concrete — the systems you build, the problems you solve, the scale you work at.]',
+    'Nine years on backend and platform teams, mostly in payments and developer infrastructure. I like the unglamorous parts — migrations that nobody notices, build times that halve, on-call rotations that get quiet.',
   actions: [
-    { label: 'See selected work', href: '#work' },
+    { label: 'Selected work', href: '#work' },
     { label: 'Get in touch', href: '#contact' },
   ],
-};
-
-/* ---------------------------------------------------------------------------
- * LOGO BAR — monochrome wordmarks on the dark canvas.
- * Text wordmarks keep the site dependency-free. Swap in <img> or SVG later.
- * -------------------------------------------------------------------------*/
-export const logoBar = {
-  caption: '[Trusted by teams at]',
-  logos: [
-    '[Company One]',
-    '[Company Two]',
-    '[Company Three]',
-    '[Company Four]',
-    '[Company Five]',
+  /** Right-hand rail of the hero. Short, factual lines. */
+  meta: [
+    { label: 'Currently', value: 'Staff Engineer at Fabrikam' },
+    { label: 'Based in', value: 'Bengaluru, India' },
+    { label: 'Focus', value: 'Distributed systems, developer platforms' },
   ],
 };
 
 /* ---------------------------------------------------------------------------
- * SELECTED WORK — the flagship case studies, rendered as large Haze cards.
+ * LOGO BAR — monochrome wordmarks.
+ * -------------------------------------------------------------------------*/
+export const logoBar = {
+  caption: 'Previously',
+  logos: ['Fabrikam', 'Northwind', 'Contoso', 'Litware', 'Adventure Works'],
+};
+
+/* ---------------------------------------------------------------------------
+ * STATS — count up when scrolled into view.
  *
- * `art` picks the generated background used in the card's image area:
- *   'clouds' | 'glass' | 'ridge' | 'orbit'
- * These are self-contained SVG compositions (src/components/Artwork.tsx).
- * To use a real screenshot instead, set `image: '/work/thing.png'` and drop
- * the file in /public/work/ — the card renders the image and ignores `art`.
+ * `value` must be a number for the counter to animate; units go in `suffix`.
+ * These are the easiest thing on the page to overstate. Keep them defensible.
+ * -------------------------------------------------------------------------*/
+export type Stat = {
+  value: number;
+  suffix: string;
+  label: string;
+  decimalPlaces?: number;
+};
+
+export const stats = {
+  items: [
+    { value: 9, suffix: '', label: 'Years in production engineering' },
+    { value: 4, suffix: '', label: 'Platform teams built or led' },
+    { value: 12, suffix: 'k', label: 'Peak requests per second served' },
+    { value: 99.98, suffix: '%', label: 'Availability, trailing 12 months', decimalPlaces: 2 },
+  ] satisfies Stat[],
+};
+
+/* ---------------------------------------------------------------------------
+ * SELECTED WORK — an indexed list, newest first.
+ *
+ * `art` picks the generated thumbnail: 'clouds' | 'glass' | 'ridge' | 'orbit'.
+ * For a real screenshot set `image: '/work/name.png'` and drop the file in
+ * public/work/ — the row then ignores `art`.
  * -------------------------------------------------------------------------*/
 export type WorkItem = {
   title: string;
@@ -110,103 +125,73 @@ export type WorkItem = {
 };
 
 const workItems: WorkItem[] = [
-    {
-      title: '[Project One]',
-      summary:
-        '[What it does and why it mattered. Lead with the outcome — the metric that moved, the thing that became possible — then the interesting technical constraint you worked against.]',
-      role: '[Lead Engineer]',
-      year: '[2025]',
-      stack: ['[TypeScript]', '[Next.js]', '[Postgres]'],
-      art: 'clouds',
-      links: [
-        { label: 'Live site', href: '#' },
-        { label: 'Source', href: '#' },
-      ],
-    },
-    {
-      title: '[Project Two]',
-      summary:
-        '[What it does and why it mattered. Two or three sentences is plenty — the card is a hook, not the case study.]',
-      role: '[Full-stack Engineer]',
-      year: '[2024]',
-      stack: ['[Go]', '[React]', '[Redis]'],
-      art: 'glass',
-      links: [
-        { label: 'Live site', href: '#' },
-        { label: 'Source', href: '#' },
-      ],
-    },
-    {
-      title: '[Project Three]',
-      summary:
-        '[What it does and why it mattered. If there is a number worth quoting — latency, throughput, users, revenue — put it in the first sentence.]',
-      role: '[Backend Engineer]',
-      year: '[2024]',
-      stack: ['[Python]', '[FastAPI]', '[AWS]'],
-      art: 'ridge',
-      links: [{ label: 'Read the write-up', href: '#' }],
-    },
-    {
-      title: '[Project Four]',
-      summary:
-        '[What it does and why it mattered. Name the hard part — that is what a reader remembers.]',
-      role: '[Creator]',
-      year: '[2023]',
-      stack: ['[Rust]', '[WebAssembly]'],
-      art: 'orbit',
-      links: [{ label: 'Source', href: '#' }],
-    },
+  {
+    title: 'Meridian',
+    summary:
+      'An internal developer platform that took service provisioning from a two-week ticket queue down to a nine-minute self-serve flow. The hard part was not the tooling — it was migrating 140 existing services onto it without a scheduled freeze.',
+    role: 'Tech lead',
+    year: '2025',
+    stack: ['Go', 'Kubernetes', 'Terraform', 'Postgres'],
+    art: 'clouds',
+    links: [
+      { label: 'Case study', href: '#' },
+      { label: 'Architecture notes', href: '#' },
+    ],
+  },
+  {
+    title: 'Tessera',
+    summary:
+      'Rebuilt the payment reconciliation pipeline as an event-sourced ledger, cutting end-of-day close from six hours to under twenty minutes. Ran it in shadow mode against the legacy system for three months before anyone trusted it.',
+    role: 'Senior engineer',
+    year: '2024',
+    stack: ['Kafka', 'Postgres', 'TypeScript'],
+    art: 'glass',
+    links: [
+      { label: 'Write-up', href: '#' },
+      { label: 'Source', href: '#' },
+    ],
+  },
+  {
+    title: 'Coastline',
+    summary:
+      'A schema-aware ingestion layer for third-party data feeds. Vendors change their formats without warning, so it validates on read and quarantines bad batches instead of failing the pipeline — bad data stopped being a 3am problem.',
+    role: 'Engineer',
+    year: '2023',
+    stack: ['Python', 'Airflow', 'S3'],
+    art: 'ridge',
+    links: [{ label: 'Write-up', href: '#' }],
+  },
+  {
+    title: 'Foundry',
+    summary:
+      'Incremental build caching for a monorepo that had grown to a 40-minute CI run. Content-addressed artefacts and a remote cache brought the median pull request down to just under seven minutes.',
+    role: 'Engineer',
+    year: '2022',
+    stack: ['Rust', 'Bazel', 'gRPC'],
+    art: 'orbit',
+    links: [{ label: 'Source', href: '#' }],
+  },
 ];
 
 export const work = {
   eyebrow: 'Selected work',
-  title: 'Things I have shipped',
+  title: 'Four things worth showing',
   subtitle:
-    '[A line framing how you pick what to work on, or what these projects have in common.]',
+    'A longer list exists, but these are the ones where the interesting decision is easy to explain.',
   items: workItems,
 };
 
 /* ---------------------------------------------------------------------------
- * STATS — the numbers count up when they scroll into view.
- *
- * `value` must be a number, not a string, for the counter to animate. Put any
- * unit in `suffix` (e.g. '+', '%', 'M'). Keep this to three or four entries —
- * a long row of numbers stops feeling like evidence and starts feeling like
- * filler. Delete the section from src/app/page.tsx if you would rather not
- * make claims in numbers.
- * -------------------------------------------------------------------------*/
-export type Stat = {
-  value: number;
-  suffix: string;
-  label: string;
-  decimalPlaces?: number;
-};
-
-export const stats = {
-  items: [
-    { value: 6, suffix: '+', label: '[Years shipping software]' },
-    { value: 40, suffix: '+', label: '[Projects delivered]' },
-    { value: 2, suffix: 'M', label: '[Users reached]' },
-    { value: 99.9, suffix: '%', label: '[Uptime maintained]', decimalPlaces: 1 },
-  ] satisfies Stat[],
-};
-
-/* ---------------------------------------------------------------------------
- * DISPLAY STATEMENT — the poster-scale moment. Bleeds to the viewport edges.
- * Two or three short words. It is set at up to 259px, so anything longer
- * stops reading as a poster and starts reading as a paragraph.
+ * DISPLAY STATEMENT — the poster-scale moment. Two or three short words.
  * -------------------------------------------------------------------------*/
 export const statement = {
-  lines: ['Ship it', 'well.'],
-  /** Optional footnote under the display type. Set to '' to hide. */
-  note: '[A short line that earns the shout — your working principle in a sentence.]',
+  lines: ['Boring', 'on purpose.'],
+  note: 'The best systems I have worked on were unremarkable to operate. That is the goal, not a consolation prize.',
 };
 
 /* ---------------------------------------------------------------------------
- * PROJECTS — the smaller grid, filterable by the pill toggles.
- *
- * Filters are derived automatically from every `tag` used below, so adding a
- * project with a new tag adds the filter chip for free. No list to maintain.
+ * PROJECTS — the smaller grid. Filter chips derive from the tags below, so a
+ * new tag adds its own chip with no second list to maintain.
  * -------------------------------------------------------------------------*/
 export type Project = {
   name: string;
@@ -217,58 +202,57 @@ export type Project = {
 };
 
 export const projects = {
-  eyebrow: 'Projects',
-  title: 'Side quests and open source',
-  subtitle:
-    '[What you build when nobody is paying you to. Filter by category below.]',
+  eyebrow: 'Side work',
+  title: 'Open source and experiments',
+  subtitle: 'Smaller things, built mostly to answer a question I had.',
   items: [
     {
-      name: '[Project Name]',
-      description: '[One sentence. What it is, who it is for.]',
+      name: 'pgshadow',
+      description: 'Runs a Postgres migration against a copy of production traffic before you ship it.',
       tag: 'Open source',
-      year: '[2025]',
+      year: '2025',
       href: '#',
     },
     {
-      name: '[Project Name]',
-      description: '[One sentence. What it is, who it is for.]',
+      name: 'slowlog',
+      description: 'A CLI that turns Postgres slow-query logs into a ranked, deduplicated report.',
       tag: 'Open source',
-      year: '[2025]',
+      year: '2024',
       href: '#',
     },
     {
-      name: '[Project Name]',
-      description: '[One sentence. What it is, who it is for.]',
+      name: 'envelope',
+      description: 'Type-safe environment variable parsing for Go services, with a startup-time report.',
       tag: 'Tools',
-      year: '[2024]',
+      year: '2024',
       href: '#',
     },
     {
-      name: '[Project Name]',
-      description: '[One sentence. What it is, who it is for.]',
+      name: 'drift',
+      description: 'Detects when deployed infrastructure stops matching what Terraform thinks it is.',
       tag: 'Tools',
-      year: '[2024]',
+      year: '2023',
       href: '#',
     },
     {
-      name: '[Project Name]',
-      description: '[One sentence. What it is, who it is for.]',
+      name: 'On queue backpressure',
+      description: 'Why most retry logic makes outages worse, with the arithmetic to show it.',
       tag: 'Writing',
-      year: '[2023]',
+      year: '2023',
       href: '#',
     },
     {
-      name: '[Project Name]',
-      description: '[One sentence. What it is, who it is for.]',
+      name: 'A toy Raft',
+      description: 'Consensus implemented badly on purpose, to understand where the hard parts hide.',
       tag: 'Experiments',
-      year: '[2023]',
+      year: '2022',
       href: '#',
     },
   ] satisfies Project[],
 };
 
 /* ---------------------------------------------------------------------------
- * EXPERIENCE — reverse-chronological. Newest first.
+ * EXPERIENCE — reverse chronological.
  * -------------------------------------------------------------------------*/
 export type Job = {
   company: string;
@@ -283,96 +267,102 @@ export const experience = {
   title: 'Where I have worked',
   items: [
     {
-      company: '[Company Name]',
-      role: '[Senior Software Engineer]',
-      period: '[2023 — Present]',
+      company: 'Fabrikam',
+      role: 'Staff Engineer, Developer Platform',
+      period: '2022 — Present',
       summary:
-        '[One sentence on the team, the product, and the scope you own.]',
+        'Own the tooling that roughly 200 engineers use to ship. Small team, broad surface.',
       highlights: [
-        '[An achievement with a number attached. What changed, by how much.]',
-        '[A system you designed or rebuilt, and the constraint that shaped it.]',
-        '[Something you did for the team — mentoring, process, hiring.]',
+        'Cut median time-to-first-deploy for a new service from 11 days to under an hour.',
+        'Led the migration off a shared monolithic database to per-service ownership, with no planned downtime.',
+        'Started the internal design-review process; it is now a requirement for anything touching payments.',
       ],
     },
     {
-      company: '[Company Name]',
-      role: '[Software Engineer]',
-      period: '[2021 — 2023]',
+      company: 'Northwind',
+      role: 'Senior Backend Engineer',
+      period: '2019 — 2022',
       summary:
-        '[One sentence on the team, the product, and the scope you owned.]',
+        'Payments infrastructure — settlement, reconciliation, and the reporting that auditors actually read.',
       highlights: [
-        '[An achievement with a number attached.]',
-        '[A system you designed or rebuilt.]',
+        'Rebuilt reconciliation as an event-sourced ledger, taking end-of-day close from six hours to twenty minutes.',
+        'Introduced contract testing between services, which ended a recurring class of release-day incident.',
       ],
     },
     {
-      company: '[Company Name]',
-      role: '[Junior Software Engineer]',
-      period: '[2020 — 2021]',
-      summary: '[One sentence on the team and what you learned there.]',
-      highlights: ['[The thing you shipped that you would still defend today.]'],
+      company: 'Contoso',
+      role: 'Backend Engineer',
+      period: '2017 — 2019',
+      summary:
+        'First engineering job. Order management for a logistics product, on a team of five.',
+      highlights: [
+        'Wrote the idempotency layer that stopped duplicate orders during carrier API timeouts — still in production.',
+      ],
     },
   ] satisfies Job[],
 };
 
 /* ---------------------------------------------------------------------------
- * SKILLS — three columns on desktop.
+ * SKILLS
  * -------------------------------------------------------------------------*/
 export const skills = {
-  eyebrow: 'Capabilities',
-  title: 'What I work with',
+  eyebrow: 'Toolkit',
+  title: 'What I reach for',
   groups: [
     {
       name: 'Languages',
-      items: ['[TypeScript]', '[Python]', '[Go]', '[SQL]', '[Rust]'],
-    },
-    {
-      name: 'Frameworks',
-      items: ['[React]', '[Next.js]', '[Node.js]', '[FastAPI]', '[Tailwind]'],
+      items: ['Go', 'TypeScript', 'Python', 'Rust', 'SQL'],
     },
     {
       name: 'Infrastructure',
-      items: ['[AWS]', '[Docker]', '[Postgres]', '[Terraform]', '[CI/CD]'],
+      items: ['Kubernetes', 'Terraform', 'AWS', 'Postgres', 'Kafka'],
+    },
+    {
+      name: 'Practice',
+      items: [
+        'Distributed systems',
+        'Observability',
+        'Incident response',
+        'Technical writing',
+        'Mentoring',
+      ],
     },
   ],
 };
 
 /* ---------------------------------------------------------------------------
- * ABOUT — the long-form paragraph. Set to 400 weight per the style guide.
+ * ABOUT — long-form, set at 400 weight.
  * -------------------------------------------------------------------------*/
 export const about = {
   eyebrow: 'About',
-  title: 'A little more context',
-  /** Each string becomes its own paragraph. */
+  title: 'The longer version',
   paragraphs: [
-    '[Who you are and how you got here. Two or three sentences — where you started, what pulled you toward engineering, what you are chasing now.]',
-    '[What you care about in the craft. Testing, performance, accessibility, developer experience — whatever you would actually argue about.]',
-    '[What you do when you are not at a keyboard. One sentence. It makes you a person rather than a résumé.]',
+    'I started in a logistics team where a duplicate order meant a physical van going to a physical address twice. That taught me more about idempotency than any paper did, and I have been drawn to systems with expensive failure modes ever since.',
+    'Most of my work now is platform engineering: the layer other engineers stand on. I care about the boring virtues — good defaults, honest error messages, migrations that can be run twice safely, and documentation written before the thing ships rather than after.',
+    'Away from the keyboard I run badly, cook ambitiously, and maintain strong opinions about Postgres that nobody asked for.',
   ],
-  portraitAlt: '[Portrait of you]',
-  /** Drop a photo at /public/portrait.jpg and set this to '/portrait.jpg'. */
+  portraitAlt: 'Portrait',
+  /** Add /public/portrait.jpg and set this to '/portrait.jpg'. */
   portrait: '',
 };
 
 /* ---------------------------------------------------------------------------
  * CONTACT
  *
- * The form posts to `formEndpoint`. It ships unset, which renders the form in
- * a disabled state with a note — so nothing silently swallows a message.
- * Point it at a Formspree / Basin / Web3Forms endpoint (or your own API
- * route) and the form goes live with no other changes.
+ * The form posts to `formEndpoint`. It ships unset, which renders the form
+ * disabled with a note — nothing silently swallows a message. Point it at a
+ * Formspree / Basin / Web3Forms endpoint or your own API route to go live.
  * -------------------------------------------------------------------------*/
 export const contact = {
   eyebrow: 'Contact',
-  title: 'Let us build something',
+  title: 'Let us talk',
   subtitle:
-    '[Say what you are open to — full-time roles, contract work, advising — and how fast you reply.]',
+    'Open to senior and staff backend roles, and to short advisory work on platform or payments problems. I reply within a couple of days.',
   formEndpoint: '',
-  /** Shown alongside the form. */
   socials: [
-    { label: 'GitHub', href: 'https://github.com/[username]' },
-    { label: 'LinkedIn', href: 'https://linkedin.com/in/[username]' },
-    { label: 'X', href: 'https://x.com/[username]' },
+    { label: 'GitHub', href: 'https://github.com/' },
+    { label: 'LinkedIn', href: 'https://linkedin.com/in/' },
+    { label: 'Writing', href: '#' },
   ],
 };
 
@@ -380,5 +370,5 @@ export const contact = {
  * FOOTER
  * -------------------------------------------------------------------------*/
 export const footer = {
-  note: '[Built from scratch. Designed to stay out of the way.]',
+  note: 'Built from scratch. Designed to stay out of the way.',
 };
