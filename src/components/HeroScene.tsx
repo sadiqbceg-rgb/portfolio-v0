@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import type { MotionValue } from 'motion/react';
 import * as THREE from 'three';
 
 /* ============================================================================
@@ -111,8 +112,25 @@ void main() {
 }
 `;
 
-export function HeroScene({ className = '' }: { className?: string }) {
+export function HeroScene({
+  className = '',
+  progress,
+}: {
+  className?: string;
+  /**
+   * External scroll progress, 0 at rest and 1 once the hero has left.
+   *
+   * Required once the hero is `position: sticky`. The internal fallback
+   * measures `-rect.top / height`, and a pinned element's rect.top stays at 0
+   * for the whole time it is stuck — so the form would never recede. When the
+   * hero shares a ScrollScene with its text layer, both move as one shot.
+   */
+  progress?: MotionValue<number>;
+}) {
   const mountRef = useRef<HTMLDivElement | null>(null);
+  // Kept in a ref so the Three.js effect never re-runs when the value changes.
+  const progressRef = useRef(progress);
+  progressRef.current = progress;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -213,19 +231,31 @@ export function HeroScene({ className = '' }: { className?: string }) {
     let targetPointerX = 0;
     let targetPointerY = 0;
 
+    // Fallback measurement, used only when no external progress is supplied.
     const onScroll = () => {
       const rect = mount.getBoundingClientRect();
       const travel = rect.height || window.innerHeight;
       scrollProgress = Math.min(Math.max(-rect.top / travel, 0), 1);
     };
+
+    // When a ScrollScene drives the hero, subscribe to it instead.
+    const external = progressRef.current;
+    const unsubscribe = external
+      ? external.on('change', (v) => {
+          scrollProgress = Math.min(Math.max(v, 0), 1);
+        })
+      : null;
+    if (external) scrollProgress = Math.min(Math.max(external.get(), 0), 1);
     const onPointerMove = (event: PointerEvent) => {
       targetPointerX = (event.clientX / window.innerWidth) * 2 - 1;
       targetPointerY = (event.clientY / window.innerHeight) * 2 - 1;
     };
 
     if (!reduceMotion) {
-      onScroll();
-      window.addEventListener('scroll', onScroll, { passive: true });
+      if (!external) {
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+      }
       window.addEventListener('pointermove', onPointerMove, { passive: true });
     }
 
@@ -289,6 +319,7 @@ export function HeroScene({ className = '' }: { className?: string }) {
         io.disconnect();
         cancelAnimationFrame(frame);
         resizeObserver.disconnect();
+        unsubscribe?.();
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('pointermove', onPointerMove);
         geometry.dispose();
@@ -301,6 +332,7 @@ export function HeroScene({ className = '' }: { className?: string }) {
 
     return () => {
       resizeObserver.disconnect();
+      unsubscribe?.();
       geometry.dispose();
       wireMaterial.dispose();
       pointMaterial.dispose();

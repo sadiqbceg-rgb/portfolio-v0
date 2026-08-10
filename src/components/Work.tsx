@@ -90,13 +90,16 @@ export function Work() {
                       </div>
                     </div>
 
-                    {reducedMotion ? (
-                      thumb
-                    ) : (
-                      <Tilt maxTilt={6} perspective={900}>
-                        {thumb}
-                      </Tilt>
-                    )}
+                    {/* Tilt stays mounted in both motion modes and is
+                        neutralised with maxTilt={0}. Swapping it out for the
+                        bare thumb would render a different tree on the server
+                        (where useReducedMotion() is always false) than on a
+                        client that asked for reduced motion — a real hydration
+                        mismatch. maxTilt only scales the pointer-driven motion
+                        values, so the markup is identical either way. */}
+                    <Tilt maxTilt={reducedMotion ? 0 : 6} perspective={900}>
+                      {thumb}
+                    </Tilt>
                   </article>
                 </Reveal>
               </li>

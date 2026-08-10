@@ -3,7 +3,7 @@ import { Contact } from '@/components/Contact';
 import { Experience } from '@/components/Experience';
 import { Footer } from '@/components/Footer';
 import { Hero } from '@/components/Hero';
-import { LogoBar } from '@/components/LogoBar';
+import { Intro } from '@/components/Intro';
 import { Nav } from '@/components/Nav';
 import { Projects } from '@/components/Projects';
 import { Skills } from '@/components/Skills';
@@ -22,8 +22,10 @@ export default function Home() {
     <>
       <Nav />
       <main>
+        {/* Hero is sticky; Intro slides up over it. They must stay adjacent
+            and in this order for the inversion to work. */}
         <Hero />
-        <LogoBar />
+        <Intro />
         <Work />
         <Statement />
         <Projects />

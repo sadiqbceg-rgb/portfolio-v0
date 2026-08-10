@@ -17,6 +17,14 @@ export const identity = {
   location: 'Riyadh, Saudi Arabia',
   email: 'gauthamnholla@gmail.com',
   url: 'https://github.com/gauthamnholla',
+
+  /**
+   * Availability line for the hero, e.g. 'Open to ML and product roles'.
+   * Left empty deliberately — this is a factual claim about you and is not
+   * mine to invent. The hero renders a pulsing indicator dot beside it when
+   * this is set, and omits the whole element when it is empty.
+   */
+  availability: '',
 };
 
 /* ---------------------------------------------------------------------------
@@ -95,7 +103,21 @@ export const hero = {
 };
 
 /* ---------------------------------------------------------------------------
- * LOGO BAR
+ * INTRO — the light panel that rises over the hero.
+ *
+ * `title` is your positioning line: one sentence on what you do and who for.
+ * It is empty because writing it for you would be putting words in your mouth.
+ * With it empty the panel still works — it shows the companies below at large
+ * scale — and adding one sentence turns it into a proper opening statement.
+ * -------------------------------------------------------------------------*/
+
+export const intro = {
+  eyebrow: 'What I do',
+  title: '',
+};
+
+/* ---------------------------------------------------------------------------
+ * LOGO BAR — consumed by the Intro panel.
  * -------------------------------------------------------------------------*/
 
 export const logoBar = {

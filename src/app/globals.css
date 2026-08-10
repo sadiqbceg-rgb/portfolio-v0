@@ -384,6 +384,28 @@
     top: calc(50vh - 28vh);
   }
 
+  /* Hero shell. Sticky is expressed here rather than as a conditional
+     className because `useReducedMotion()` is false during SSR and true on a
+     client that asked for it — branching a class name on it produces a real
+     hydration mismatch. CSS resolves per-client with no such split. */
+  .hero-shell {
+    position: relative;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-shell {
+      position: sticky;
+      top: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-shell {
+      position: relative;
+      top: auto;
+    }
+  }
+
   /* Radial glow for the closing CTA. One element, GPU-composited, no filter. */
   .glow-radial {
     background: radial-gradient(
