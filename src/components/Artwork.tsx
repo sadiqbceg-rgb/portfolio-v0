@@ -1,331 +1,442 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+
 /* ============================================================================
- * ARTWORK
+ * ARTWORK — generative canvas compositions.
  *
- * The style reference carries its emotion through full-bleed cloud photography
- * and sculptural translucent glass forms. Rather than ship stock photos this
- * generates that imagery as self-contained SVG — no binary assets, no network
- * requests, and every parameter is a number you can edit.
+ * The style reference carries its emotion through imagery. Rather than ship
+ * stock photography (licence-encumbered, and generic), each piece is drawn
+ * procedurally from a seed: no binary assets, no network requests, and every
+ * project gets a distinct image that is stable across reloads and deploys.
  *
- * Gradients and blurs live ONLY inside these compositions. They stand in for
- * photography, which is exactly where the style guide permits tonal depth. The
- * UI chrome around them stays flat: no gradient buttons, cards or backgrounds.
+ * The four modes are drawn from the visual language of engineering rather than
+ * from abstract-art defaults — a contour survey, a flow field, a network
+ * lattice, an orbital trace. They read as instruments, which is the point on
+ * an infrastructure portfolio.
  *
- * To replace a composition with a real photograph, pass `image` to the card
- * instead — see src/content/site.ts.
+ * Everything renders once, on mount. There is no animation loop, so a page
+ * with several of these costs nothing after paint.
+ *
+ * To use a real screenshot instead, set `image: '/work/name.png'` on the work
+ * item in src/content/site.ts — the row then ignores `art` entirely.
  * ==========================================================================*/
 
-type Variant = 'clouds' | 'glass' | 'ridge' | 'orbit';
+export type ArtVariant = 'contour' | 'flow' | 'lattice' | 'orbit';
+
+/* --- Deterministic randomness ------------------------------------------- */
+
+/** mulberry32 — small, fast, and stable for a given seed. */
+function mulberry32(seed: number) {
+  let a = seed | 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Turn an arbitrary string (a project title) into a stable numeric seed. */
+function hashSeed(text: string) {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/** Classic Perlin noise, permutation table shuffled from the seeded RNG. */
+function makeNoise(rand: () => number) {
+  const perm = Array.from({ length: 256 }, (_, i) => i);
+  for (let i = 255; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [perm[i], perm[j]] = [perm[j], perm[i]];
+  }
+  const p = new Uint8Array(512);
+  for (let i = 0; i < 512; i++) p[i] = perm[i & 255];
+
+  const fade = (t: number) => t * t * t * (t * (t * 6 - 15) + 10);
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  const grad = (h: number, x: number, y: number) =>
+    (h & 1 ? x : -x) + (h & 2 ? y : -y);
+
+  return (x: number, y: number) => {
+    const xi = Math.floor(x) & 255;
+    const yi = Math.floor(y) & 255;
+    const xf = x - Math.floor(x);
+    const yf = y - Math.floor(y);
+    const u = fade(xf);
+    const v = fade(yf);
+    const aa = p[p[xi] + yi];
+    const ab = p[p[xi] + yi + 1];
+    const ba = p[p[xi + 1] + yi];
+    const bb = p[p[xi + 1] + yi + 1];
+    return lerp(
+      lerp(grad(aa, xf, yf), grad(ba, xf - 1, yf), u),
+      lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u),
+      v,
+    );
+  };
+}
+
+/** Fractal Brownian motion — layered noise, each octave finer and fainter. */
+function fbm(
+  noise: (x: number, y: number) => number,
+  x: number,
+  y: number,
+  octaves = 5,
+) {
+  let value = 0;
+  let amplitude = 0.5;
+  let frequency = 1;
+  for (let i = 0; i < octaves; i++) {
+    value += amplitude * noise(x * frequency, y * frequency);
+    frequency *= 2;
+    amplitude *= 0.5;
+  }
+  return value;
+}
+
+/* --- Palette -------------------------------------------------------------
+ * Kept in sync with the design tokens by hand: these are canvas draw calls,
+ * which cannot read CSS custom properties without a layout round-trip.
+ * ------------------------------------------------------------------------ */
+const INK_GROUND = '#05070c';
+const TWILIGHT = '66, 97, 136'; // --color-twilight-blue
+const SIGNAL = '43, 127, 255'; // --color-signal-blue
+const WHITE = '255, 255, 255';
+
+/* --- Modes ---------------------------------------------------------------*/
 
 /**
- * Every SVG filter and gradient needs a document-unique id. Server components
- * cannot call useId, so callers pass a `uid` (e.g. "work-0") and the ids are
- * derived from it.
+ * Contour — a topographic survey of a noise field, drawn with marching
+ * squares. Thin isolines on near-black; the densest bands read as terrain.
  */
-function Clouds({ uid }: { uid: string }) {
-  return (
-    <svg
-      viewBox="0 0 800 500"
-      preserveAspectRatio="xMidYMid slice"
-      className="h-full w-full"
-      aria-hidden="true"
-    >
-      <defs>
-        {/* Two turbulence passes at different frequencies read as depth: a
-            broad soft mass behind, finer wisps in front. */}
-        <filter id={`${uid}-back`} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.0035 0.008"
-            numOctaves="6"
-            seed="11"
-            stitchTiles="stitch"
-            result="t"
-          />
-          <feColorMatrix
-            in="t"
-            type="matrix"
-            values="0 0 0 0 0.26
-                    0 0 0 0 0.38
-                    0 0 0 0 0.53
-                    0.62 0.62 0.62 0 -0.62"
-          />
-        </filter>
-        <filter id={`${uid}-front`} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.011 0.02"
-            numOctaves="5"
-            seed="4"
-            stitchTiles="stitch"
-            result="t"
-          />
-          <feColorMatrix
-            in="t"
-            type="matrix"
-            values="0 0 0 0 0.85
-                    0 0 0 0 0.89
-                    0 0 0 0 0.96
-                    0.5 0.5 0.5 0 -0.72"
-          />
-          <feGaussianBlur stdDeviation="1.6" />
-        </filter>
-        <radialGradient id={`${uid}-glow`} cx="62%" cy="28%" r="58%">
-          <stop offset="0%" stopColor="#6f8db8" stopOpacity="0.55" />
-          <stop offset="55%" stopColor="#426188" stopOpacity="0.16" />
-          <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-        </radialGradient>
-      </defs>
+function drawContour(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  rand: () => number,
+) {
+  const noise = makeNoise(rand);
+  const scale = 2.6;
+  const cols = 120;
+  const rows = Math.max(24, Math.round(cols * (h / w)));
+  const cw = w / cols;
+  const ch = h / rows;
+  const originX = rand() * 40;
+  const originY = rand() * 40;
 
-      <rect width="800" height="500" fill="#05070c" />
-      <rect width="800" height="500" filter={`url(#${uid}-back)`} />
-      <rect width="800" height="500" fill={`url(#${uid}-glow)`} />
-      <rect width="800" height="500" filter={`url(#${uid}-front)`} opacity="0.5" />
-    </svg>
-  );
+  // Sample the scalar field once; marching squares reads it per threshold.
+  const field: number[][] = [];
+  for (let y = 0; y <= rows; y++) {
+    const row: number[] = [];
+    for (let x = 0; x <= cols; x++) {
+      row.push(
+        fbm(noise, originX + (x / cols) * scale, originY + (y / rows) * scale),
+      );
+    }
+    field.push(row);
+  }
+
+  const levels = 22;
+  for (let i = 0; i < levels; i++) {
+    const t = i / (levels - 1);
+    const threshold = -0.42 + t * 0.84;
+
+    // Lines nearer the middle of the range sit "closer" — brighter and thicker.
+    const centrality = 1 - Math.abs(t - 0.5) * 2;
+    const alpha = 0.1 + centrality * 0.42;
+    const tint = t > 0.62 ? SIGNAL : TWILIGHT;
+    ctx.strokeStyle = `rgba(${i % 5 === 0 ? WHITE : tint}, ${alpha})`;
+    ctx.lineWidth = i % 5 === 0 ? 1.1 : 0.7;
+    ctx.beginPath();
+
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const tl = field[y][x];
+        const tr = field[y][x + 1];
+        const br = field[y + 1][x + 1];
+        const bl = field[y + 1][x];
+
+        let state = 0;
+        if (tl > threshold) state |= 8;
+        if (tr > threshold) state |= 4;
+        if (br > threshold) state |= 2;
+        if (bl > threshold) state |= 1;
+        if (state === 0 || state === 15) continue;
+
+        const x0 = x * cw;
+        const y0 = y * ch;
+        // Linear interpolation puts each crossing at the true zero, which is
+        // what stops the lines looking like stair-stepped pixels.
+        const lerpX = (a: number, b: number) => (threshold - a) / (b - a);
+        const top = { x: x0 + cw * lerpX(tl, tr), y: y0 };
+        const right = { x: x0 + cw, y: y0 + ch * lerpX(tr, br) };
+        const bottom = { x: x0 + cw * lerpX(bl, br), y: y0 + ch };
+        const left = { x: x0, y: y0 + ch * lerpX(tl, bl) };
+
+        const seg = (a: { x: number; y: number }, b: { x: number; y: number }) => {
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+        };
+
+        switch (state) {
+          case 1: case 14: seg(left, bottom); break;
+          case 2: case 13: seg(bottom, right); break;
+          case 3: case 12: seg(left, right); break;
+          case 4: case 11: seg(top, right); break;
+          case 6: case 9: seg(top, bottom); break;
+          case 7: case 8: seg(left, top); break;
+          case 5: seg(left, top); seg(bottom, right); break;
+          case 10: seg(left, bottom); seg(top, right); break;
+        }
+      }
+    }
+    ctx.stroke();
+  }
 }
 
-function Glass({ uid }: { uid: string }) {
-  return (
-    <svg
-      viewBox="0 0 800 500"
-      preserveAspectRatio="xMidYMid slice"
-      className="h-full w-full"
-      aria-hidden="true"
-    >
-      <defs>
-        <filter id={`${uid}-haze`} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.004 0.01"
-            numOctaves="5"
-            seed="23"
-            stitchTiles="stitch"
-            result="t"
-          />
-          <feColorMatrix
-            in="t"
-            type="matrix"
-            values="0 0 0 0 0.24
-                    0 0 0 0 0.33
-                    0 0 0 0 0.47
-                    0.6 0.6 0.6 0 -0.68"
-          />
-        </filter>
-        {/* The sculptural form: overlapping translucent lobes, softly blurred,
-            reading as a single refractive object rather than flat shapes. */}
-        <linearGradient id={`${uid}-g1`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.72" />
-          <stop offset="48%" stopColor="#8fb0d8" stopOpacity="0.34" />
-          <stop offset="100%" stopColor="#426188" stopOpacity="0.5" />
-        </linearGradient>
-        <linearGradient id={`${uid}-g2`} x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#2b7fff" stopOpacity="0.34" />
-          <stop offset="100%" stopColor="#ffffff" stopOpacity="0.24" />
-        </linearGradient>
-        <filter id={`${uid}-soft`}>
-          <feGaussianBlur stdDeviation="9" />
-        </filter>
-        <filter id={`${uid}-caustic`}>
-          <feGaussianBlur stdDeviation="3" />
-        </filter>
-      </defs>
+/**
+ * Flow — particles advected through a noise-driven vector field, each leaving
+ * a trail. The result is a wind map: directional, organic, unmistakably a
+ * simulation rather than a texture.
+ */
+function drawFlow(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  rand: () => number,
+) {
+  const noise = makeNoise(rand);
+  const particles = 900;
+  const steps = 90;
+  const stepLength = Math.max(w, h) / 190;
+  const scale = 0.0032;
 
-      <rect width="800" height="500" fill="#05070c" />
-      <rect width="800" height="500" filter={`url(#${uid}-haze)`} />
+  ctx.lineCap = 'round';
 
-      {/* The body of the sculpture: asymmetric overlapping lobes rather than a
-          circle, so it reads as a blown, hand-made form. */}
-      <g filter={`url(#${uid}-soft)`}>
-        <path
-          d="M400 68 C512 68 596 154 596 262 C596 372 508 438 398 438 C286 438 206 366 206 258 C206 150 292 68 400 68 Z"
-          fill={`url(#${uid}-g1)`}
-        />
-        <ellipse
-          cx="468"
-          cy="206"
-          rx="112"
-          ry="146"
-          fill={`url(#${uid}-g2)`}
-          transform="rotate(-24 468 206)"
-        />
-        <ellipse cx="332" cy="304" rx="88" ry="112" fill="#ffffff" opacity="0.16" />
-      </g>
+  for (let i = 0; i < particles; i++) {
+    let x = rand() * w;
+    let y = rand() * h;
 
-      {/* Refraction: a bright caustic band bent through the body, plus rim
-          light on the upper left only. Partial arcs, never a closed outline —
-          a full stroke reads as a drawn circle instead of a lit edge. */}
-      <g filter={`url(#${uid}-caustic)`} fill="none" strokeLinecap="round">
-        <path
-          d="M262 176 C316 132 396 118 462 140"
-          stroke="#ffffff"
-          strokeOpacity="0.5"
-          strokeWidth="3"
-        />
-        <path
-          d="M246 250 C300 300 380 330 470 318"
-          stroke="#8fb0d8"
-          strokeOpacity="0.32"
-          strokeWidth="2"
-        />
-        <path
-          d="M520 330 C560 300 578 262 580 226"
-          stroke="#ffffff"
-          strokeOpacity="0.22"
-          strokeWidth="2"
-        />
-      </g>
-    </svg>
-  );
+    // Depth cue: a third of the trails are brighter and sit "in front".
+    const front = rand() > 0.68;
+    const tint = front ? WHITE : rand() > 0.5 ? SIGNAL : TWILIGHT;
+    ctx.strokeStyle = `rgba(${tint}, ${front ? 0.3 : 0.14})`;
+    ctx.lineWidth = front ? 0.9 : 0.6;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+
+    for (let s = 0; s < steps; s++) {
+      const angle = fbm(noise, x * scale, y * scale, 4) * Math.PI * 2.4;
+      x += Math.cos(angle) * stepLength;
+      y += Math.sin(angle) * stepLength;
+      if (x < 0 || x > w || y < 0 || y > h) break;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
 }
 
-function Ridge({ uid }: { uid: string }) {
-  return (
-    <svg
-      viewBox="0 0 800 500"
-      preserveAspectRatio="xMidYMid slice"
-      className="h-full w-full"
-      aria-hidden="true"
-    >
-      <defs>
-        <filter id={`${uid}-mist`} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.006 0.014"
-            numOctaves="5"
-            seed="31"
-            stitchTiles="stitch"
-            result="t"
-          />
-          <feColorMatrix
-            in="t"
-            type="matrix"
-            values="0 0 0 0 0.55
-                    0 0 0 0 0.65
-                    0 0 0 0 0.8
-                    0.5 0.5 0.5 0 -0.66"
-          />
-          <feGaussianBlur stdDeviation="2" />
-        </filter>
-        <linearGradient id={`${uid}-sky`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0d1522" />
-          <stop offset="70%" stopColor="#243449" />
-          <stop offset="100%" stopColor="#41608a" />
-        </linearGradient>
-        <filter id={`${uid}-far`}>
-          <feGaussianBlur stdDeviation="6" />
-        </filter>
-        <filter id={`${uid}-near`}>
-          <feGaussianBlur stdDeviation="2" />
-        </filter>
-      </defs>
+/**
+ * Lattice — a node graph with proximity edges. Reads as a service topology,
+ * which is the most on-subject image an infrastructure portfolio can carry.
+ */
+function drawLattice(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  rand: () => number,
+) {
+  // Density is set against area so a small thumbnail and a full-bleed hero
+  // both read as the same graph rather than the same node count stretched.
+  const count = Math.max(28, Math.round((w * h) / 1250));
+  const nodes: { x: number; y: number; r: number }[] = [];
 
-      <rect width="800" height="500" fill={`url(#${uid}-sky)`} />
-      {/* Receding ridgelines. Each layer is blurred a little less than the one
-          behind it — distance reads as softness, so the far ridge dissolves
-          into the sky while the near one keeps its edge. Irregular spacing
-          keeps them from scanning as a zigzag pattern. */}
-      <path
-        d="M0 372 L96 318 L188 344 L268 292 L352 338 L436 276 L534 330 L622 288 L714 326 L800 300 L800 500 L0 500 Z"
-        fill="#0b1220"
-        opacity="0.85"
-        filter={`url(#${uid}-far)`}
-      />
-      <path
-        d="M0 424 L118 374 L214 410 L318 356 L402 402 L502 350 L596 396 L702 358 L800 388 L800 500 L0 500 Z"
-        fill="#070c15"
-        opacity="0.95"
-        filter={`url(#${uid}-near)`}
-      />
-      <rect width="800" height="500" filter={`url(#${uid}-mist)`} opacity="0.55" />
-    </svg>
-  );
+  // Rejection sampling keeps nodes from clumping, so the graph reads evenly.
+  const minDist = Math.min(w, h) / 16;
+  let guard = 0;
+  while (nodes.length < count && guard < count * 80) {
+    guard++;
+    const x = rand() * w;
+    const y = rand() * h;
+    if (nodes.some((n) => Math.hypot(n.x - x, n.y - y) < minDist)) continue;
+    nodes.push({ x, y, r: 1 + rand() * 1.8 });
+  }
+
+  const linkDist = minDist * 2.9;
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+      if (d > linkDist) continue;
+      // Closer pairs draw stronger links — the falloff is what gives depth.
+      const strength = 1 - d / linkDist;
+      ctx.strokeStyle = `rgba(${TWILIGHT}, ${0.16 + strength * 0.62})`;
+      ctx.lineWidth = 0.5 + strength * 0.5;
+      ctx.beginPath();
+      ctx.moveTo(nodes[i].x, nodes[i].y);
+      ctx.lineTo(nodes[j].x, nodes[j].y);
+      ctx.stroke();
+    }
+  }
+
+  for (const n of nodes) {
+    const hot = rand() > 0.82;
+    ctx.fillStyle = hot ? `rgba(${SIGNAL}, 0.95)` : `rgba(${WHITE}, 0.62)`;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (hot) {
+      ctx.fillStyle = `rgba(${SIGNAL}, 0.14)`;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r * 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 }
 
-function Orbit({ uid }: { uid: string }) {
-  return (
-    <svg
-      viewBox="0 0 800 500"
-      preserveAspectRatio="xMidYMid slice"
-      className="h-full w-full"
-      aria-hidden="true"
-    >
-      <defs>
-        <filter id={`${uid}-grain`} x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.005 0.011"
-            numOctaves="5"
-            seed="17"
-            stitchTiles="stitch"
-            result="t"
-          />
-          <feColorMatrix
-            in="t"
-            type="matrix"
-            values="0 0 0 0 0.22
-                    0 0 0 0 0.31
-                    0 0 0 0 0.45
-                    0.58 0.58 0.58 0 -0.66"
-          />
-        </filter>
-        <radialGradient id={`${uid}-core`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.9" />
-          <stop offset="45%" stopColor="#8fb0d8" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#426188" stopOpacity="0" />
-        </radialGradient>
-      </defs>
+/**
+ * Orbit — nested elliptical traces perturbed by noise, like a plotted
+ * trajectory. The one mode that keeps a clear focal point.
+ */
+function drawOrbit(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  h: number,
+  rand: () => number,
+) {
+  const noise = makeNoise(rand);
+  const cx = w * (0.42 + rand() * 0.16);
+  const cy = h * (0.46 + rand() * 0.12);
+  const tilt = (-0.5 + rand()) * 0.7;
+  const rings = 34;
 
-      <rect width="800" height="500" fill="#05070c" />
-      <rect width="800" height="500" filter={`url(#${uid}-grain)`} />
-      <g
-        fill="none"
-        stroke="#ffffff"
-        strokeOpacity="0.22"
-        transform="rotate(-16 400 250)"
-      >
-        <ellipse cx="400" cy="250" rx="270" ry="96" />
-        <ellipse cx="400" cy="250" rx="205" ry="72" />
-        <ellipse cx="400" cy="250" rx="140" ry="49" />
-      </g>
-      <circle cx="400" cy="250" r="96" fill={`url(#${uid}-core)`} />
-    </svg>
-  );
+  for (let i = 0; i < rings; i++) {
+    const t = i / (rings - 1);
+    const rx = (Math.min(w, h) * 0.12 + t * Math.max(w, h) * 0.46) * 1;
+    const ry = rx * (0.26 + t * 0.16);
+    const alpha = (1 - t) * 0.42 + 0.05;
+    ctx.strokeStyle = `rgba(${t > 0.75 ? SIGNAL : t > 0.3 ? TWILIGHT : WHITE}, ${alpha})`;
+    ctx.lineWidth = t < 0.2 ? 1 : 0.6;
+    ctx.beginPath();
+
+    const segments = 220;
+    for (let s = 0; s <= segments; s++) {
+      const a = (s / segments) * Math.PI * 2;
+      // Noise perturbation stops the rings reading as a plain vector ellipse.
+      const wobble = 1 + fbm(noise, Math.cos(a) * 1.4 + i * 0.2, Math.sin(a) * 1.4, 3) * 0.28;
+      const px = Math.cos(a) * rx * wobble;
+      const py = Math.sin(a) * ry * wobble;
+      const x = cx + px * Math.cos(tilt) - py * Math.sin(tilt);
+      const y = cy + px * Math.sin(tilt) + py * Math.cos(tilt);
+      if (s === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  // Core glow, drawn last so it sits above the traces.
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.3);
+  glow.addColorStop(0, `rgba(${WHITE}, 0.75)`);
+  glow.addColorStop(0.25, `rgba(${SIGNAL}, 0.16)`);
+  glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
 }
 
-const VARIANTS: Record<Variant, (props: { uid: string }) => React.JSX.Element> = {
-  clouds: Clouds,
-  glass: Glass,
-  ridge: Ridge,
-  orbit: Orbit,
+const MODES: Record<
+  ArtVariant,
+  (ctx: CanvasRenderingContext2D, w: number, h: number, rand: () => number) => void
+> = {
+  contour: drawContour,
+  flow: drawFlow,
+  lattice: drawLattice,
+  orbit: drawOrbit,
 };
 
-export function Artwork({ variant, uid }: { variant: Variant; uid: string }) {
-  const Composition = VARIANTS[variant];
-  return <Composition uid={uid} />;
+/* --- Component -----------------------------------------------------------*/
+
+export function Artwork({
+  variant,
+  uid,
+  className = '',
+}: {
+  variant: ArtVariant;
+  /** Any stable string. The same uid always produces the same image. */
+  uid: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
+
+    const render = () => {
+      const { width, height } = parent.getBoundingClientRect();
+      if (width === 0 || height === 0) return;
+
+      // Render at device resolution; hairlines alias badly otherwise.
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = INK_GROUND;
+      ctx.fillRect(0, 0, width, height);
+
+      MODES[variant](ctx, width, height, mulberry32(hashSeed(uid + variant)));
+    };
+
+    render();
+
+    // Redraw on resize — the composition is laid out in CSS pixels, so a
+    // stretched bitmap would blur rather than reflow.
+    const observer = new ResizeObserver(render);
+    observer.observe(parent);
+    return () => observer.disconnect();
+  }, [variant, uid]);
+
+  return (
+    <canvas
+      ref={ref}
+      aria-hidden="true"
+      className={`block h-full w-full ${className}`}
+    />
+  );
 }
 
 /**
- * Full-bleed atmospheric backdrop for hero and statement sections. Sits behind
- * content at low opacity so Whiteout text keeps its contrast ratio.
+ * Full-bleed backdrop for hero and statement sections. Sits behind content at
+ * reduced opacity with a scrim, so text keeps its contrast ratio.
  */
 export function Atmosphere({
   uid,
-  variant = 'clouds',
+  variant = 'contour',
   className = '',
 }: {
   uid: string;
-  variant?: Variant;
+  variant?: ArtVariant;
   className?: string;
 }) {
   return (
     <div className={`absolute inset-0 -z-10 overflow-hidden ${className}`}>
       <Artwork variant={variant} uid={uid} />
-      {/* Scrim: keeps body copy legible over the brightest parts of the sky. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.85) 100%)',
+            'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.42) 45%, rgba(0,0,0,0.88) 100%)',
         }}
       />
     </div>

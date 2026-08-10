@@ -3,7 +3,7 @@
 import { useReducedMotion } from 'motion/react';
 import { StarsBackground } from '@/components/animate-ui/components/backgrounds/stars';
 import { Magnetic } from '@/components/animate-ui/primitives/effects/magnetic';
-import { Atmosphere } from './Artwork';
+import { Atmosphere, type ArtVariant } from './Artwork';
 import { hero, identity } from '@/content/site';
 
 /* Hero — full-bleed backdrop, but the content is a left-aligned two-column
@@ -29,7 +29,7 @@ export function Hero() {
           speed={60}
         />
       ) : (
-        <Atmosphere uid="hero" variant="clouds" />
+        <Atmosphere uid="hero" variant={hero.background as ArtVariant} />
       )}
 
       <div className="shell pointer-events-none w-full py-20">

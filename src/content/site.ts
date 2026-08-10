@@ -11,6 +11,8 @@
  * Nothing is hard-coded in the markup; this file is the whole content layer.
  * ==========================================================================*/
 
+import type { ArtVariant } from '@/components/Artwork';
+
 /* ---------------------------------------------------------------------------
  * IDENTITY
  * -------------------------------------------------------------------------*/
@@ -52,11 +54,15 @@ export const nav = {
  * -------------------------------------------------------------------------*/
 export const hero = {
   /**
-   * Backdrop:
-   *   'stars'   — Animate UI's parallax star field, tracks the cursor.
-   *   'artwork' — generated SVG cloud composition, closer to the reference.
+   * Backdrop. Either the interactive star field, or any of the generated
+   * canvas compositions:
+   *   'stars'   — parallax star field, tracks the cursor
+   *   'contour' — topographic survey lines
+   *   'flow'    — vector field streamlines
+   *   'lattice' — network graph
+   *   'orbit'   — trajectory trace with a bright core
    */
-  background: 'stars' as 'stars' | 'artwork',
+  background: 'contour' as 'stars' | ArtVariant,
   headline: [
     { text: 'I build the systems', accent: false },
     { text: 'other', accent: true },
@@ -109,7 +115,10 @@ export const stats = {
 /* ---------------------------------------------------------------------------
  * SELECTED WORK — an indexed list, newest first.
  *
- * `art` picks the generated thumbnail: 'clouds' | 'glass' | 'ridge' | 'orbit'.
+ * `art` picks the generated image: 'contour' (topographic survey), 'flow'
+ * (vector field), 'lattice' (network graph) or 'orbit' (trajectory trace).
+ * Each is drawn from a seed derived from the project title, so the same
+ * project always gets the same image.
  * For a real screenshot set `image: '/work/name.png'` and drop the file in
  * public/work/ — the row then ignores `art`.
  * -------------------------------------------------------------------------*/
@@ -119,7 +128,7 @@ export type WorkItem = {
   role: string;
   year: string;
   stack: string[];
-  art: 'clouds' | 'glass' | 'ridge' | 'orbit';
+  art: ArtVariant;
   image?: string;
   links: { label: string; href: string }[];
 };
@@ -132,7 +141,7 @@ const workItems: WorkItem[] = [
     role: 'Tech lead',
     year: '2025',
     stack: ['Go', 'Kubernetes', 'Terraform', 'Postgres'],
-    art: 'clouds',
+    art: 'contour',
     links: [
       { label: 'Case study', href: '#' },
       { label: 'Architecture notes', href: '#' },
@@ -145,7 +154,7 @@ const workItems: WorkItem[] = [
     role: 'Senior engineer',
     year: '2024',
     stack: ['Kafka', 'Postgres', 'TypeScript'],
-    art: 'glass',
+    art: 'lattice',
     links: [
       { label: 'Write-up', href: '#' },
       { label: 'Source', href: '#' },
@@ -158,7 +167,7 @@ const workItems: WorkItem[] = [
     role: 'Engineer',
     year: '2023',
     stack: ['Python', 'Airflow', 'S3'],
-    art: 'ridge',
+    art: 'flow',
     links: [{ label: 'Write-up', href: '#' }],
   },
   {

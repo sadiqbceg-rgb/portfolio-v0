@@ -34,7 +34,7 @@ export function Work() {
         <ol className="flex flex-col">
           {work.items.map((item, i) => {
             const thumb = (
-              <div className="card-image aspect-[16/10] w-full">
+              <div className="card-image aspect-[16/11] w-full">
                 {item.image ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -51,7 +51,7 @@ export function Work() {
             return (
               <li key={item.title} className="border-t hairline">
                 <Reveal>
-                  <article className="grid grid-cols-1 gap-x-10 gap-y-6 py-10 md:grid-cols-[5rem_minmax(0,1fr)_14rem]">
+                  <article className="grid grid-cols-1 gap-x-10 gap-y-6 py-10 md:grid-cols-[5rem_minmax(0,1fr)_20rem]">
                     {/* Year rail */}
                     <div className="flex flex-row items-baseline gap-3 md:flex-col md:gap-1">
                       <p className="text-body tabular-nums text-whiteout">

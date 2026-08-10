@@ -7,7 +7,7 @@ import { statement } from '@/content/site';
 export function Statement() {
   return (
     <section className="relative overflow-hidden py-24">
-      <Atmosphere uid="statement" variant="glass" />
+      <Atmosphere uid="statement" variant="flow" />
 
       <div className="flex flex-col items-center gap-10 px-4">
         <h2 className="display-headline text-center">

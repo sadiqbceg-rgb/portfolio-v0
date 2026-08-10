@@ -37,7 +37,7 @@ export function About() {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <Artwork variant="glass" uid="about" />
+                  <Artwork variant="orbit" uid="about" />
                 )}
               </div>
               <p className="text-caption text-whiteout/50">
