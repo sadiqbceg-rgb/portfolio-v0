@@ -76,6 +76,48 @@ html = html.replace(
   },
 );
 
+// --- Lazy chunks -----------------------------------------------------------
+// Code-split chunks (Three.js, via next/dynamic) are not referenced by any
+// <script src> in the HTML — webpack fetches them at runtime, which a
+// single-file page cannot do. Appending every remaining chunk inline makes
+// webpack mark them installed, so the dynamic import() resolves from memory
+// instead of hitting the network. Without this the import rejects and takes
+// the whole client render down with it.
+const chunkDir = path.join(ROOT, '_next', 'static', 'chunks');
+const walk = (dir) =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    return entry.isDirectory() ? walk(full) : full.endsWith('.js') ? [full] : [];
+  });
+
+const alreadyInlined = new Set(
+  [...html.matchAll(/\/_next\/static\/chunks\/[^"']+\.js/g)].map((m) => m[0]),
+);
+const lazy = walk(chunkDir)
+  .map((abs) => '/' + path.relative(ROOT, abs).split(path.sep).join('/'))
+  .filter((rel) => !alreadyInlined.has(rel));
+
+const lazyScripts = lazy
+  .map((rel) => {
+    const code = read(rel)
+      .toString('utf8')
+      .replace(/<\/script/gi, '<\\/script')
+      .replace(/�/g, '\\uFFFD');
+    return `<script>${code}</script>`;
+  })
+  .join('\n');
+
+// Injected *before* the app scripts, not after. Webpack chunks self-register
+// by pushing onto `self.webpackChunk_N_E`, and the runtime drains whatever is
+// already in that array when it boots — so pre-registering works, but only if
+// it happens first. Appended at the end of <body> the dynamic import has
+// already fired and failed during hydration.
+const firstScript = html.indexOf('<script');
+html =
+  firstScript === -1
+    ? html + lazyScripts
+    : html.slice(0, firstScript) + lazyScripts + '\n' + html.slice(firstScript);
+
 // --- Global path swaps ---
 for (const [p, uri] of Object.entries(cssUri)) html = html.split(p).join(uri);
 for (const f of fontPaths) {
@@ -91,6 +133,7 @@ const remaining = ['/_next/static/css', '/_next/static/chunks', '/fonts/'].filte
 );
 
 console.log(`preview/index.html — ${(html.length / 1e6).toFixed(2)} MB`);
+console.log(`  lazy chunks pre-registered: ${lazy.length}`);
 console.log(
   remaining.length
     ? `WARNING: unresolved asset paths remain: ${remaining.join(', ')}`
