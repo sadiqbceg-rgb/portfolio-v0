@@ -8,7 +8,6 @@ import { Nav } from '@/components/Nav';
 import { Projects } from '@/components/Projects';
 import { Skills } from '@/components/Skills';
 import { Statement } from '@/components/Statement';
-import { Stats } from '@/components/Stats';
 import { Work } from '@/components/Work';
 
 /* Page composition.
@@ -25,7 +24,6 @@ export default function Home() {
       <main>
         <Hero />
         <LogoBar />
-        <Stats />
         <Work />
         <Statement />
         <Projects />

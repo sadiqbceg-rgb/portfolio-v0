@@ -4,7 +4,7 @@ import { useReducedMotion } from 'motion/react';
 import { StarsBackground } from '@/components/animate-ui/components/backgrounds/stars';
 import { Magnetic } from '@/components/animate-ui/primitives/effects/magnetic';
 import { Atmosphere, type ArtVariant } from './Artwork';
-import { hero, identity } from '@/content/site';
+import { hero } from '@/content/site';
 
 /* Hero — full-bleed backdrop, but the content is a left-aligned two-column
  * composition rather than a centred stack: headline and actions on the left,
@@ -36,7 +36,7 @@ export function Hero() {
         <div className="grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,17rem)] lg:items-end">
           <div className="flex flex-col gap-8">
             <p className="text-caption uppercase tracking-[0.16em] text-twilight-soft">
-              {identity.availability}
+              {hero.eyebrow}
             </p>
 
             <h1 className="font-control-tnt text-heading-lg text-whiteout max-w-[20ch] text-balance">
