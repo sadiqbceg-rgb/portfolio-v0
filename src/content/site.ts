@@ -492,7 +492,7 @@ export const about = {
 
   portraitAlt: 'Portrait of Gautham N Holla',
 
-  portrait: '',
+  portrait: '/portrait.webp',
 };
 
 /* ---------------------------------------------------------------------------
