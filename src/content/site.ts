@@ -16,15 +16,36 @@ export const identity = {
   role: 'ML Engineer | Product Manager | Developer',
   location: 'Riyadh, Saudi Arabia',
   email: 'gauthamnholla@gmail.com',
+
+  /** Your GitHub profile. Not where this site is hosted — that is `siteUrl`. */
   url: 'https://github.com/gauthamnholla',
 
   /**
-   * Availability line for the hero, e.g. 'Open to ML and product roles'.
-   * Left empty deliberately — this is a factual claim about you and is not
-   * mine to invent. The hero renders a pulsing indicator dot beside it when
-   * this is set, and omits the whole element when it is empty.
+   * The public origin this site is served from, e.g. 'https://gauthamnholla.com'.
+   * No trailing slash.
+   *
+   * This is what social previews are resolved against. It used to fall back to
+   * `url` above, which made og:image point at
+   * github.com/gauthamnholla/opengraph-image.png — a 404, so every shared link
+   * previewed with no image.
+   *
+   * Leave it empty and the deploy platform is asked instead: Vercel sets
+   * VERCEL_URL on every deployment, and NEXT_PUBLIC_SITE_URL overrides
+   * everything if you set it yourself. Filling this in is still the clearest
+   * option once you have a domain.
    */
-  availability: '',
+  siteUrl: '',
+
+  /**
+   * Availability line for the hero. Rendered with a pulsing indicator dot;
+   * omitted entirely when empty, so clear this the moment it stops being true.
+   *
+   * This is not a new claim — `contact.subtitle` already says you are open to
+   * freelance work and full-time positions. It only says it at the very bottom
+   * of the page, which is a long way to scroll for the one fact a recruiter
+   * opens a portfolio to find.
+   */
+  availability: 'Available for freelance and full-time work',
 };
 
 /* ---------------------------------------------------------------------------
@@ -104,15 +125,16 @@ export const hero = {
 /* ---------------------------------------------------------------------------
  * INTRO — the light panel that rises over the hero.
  *
- * `title` is your positioning line: one sentence on what you do and who for.
- * It is empty because writing it for you would be putting words in your mouth.
- * With it empty the panel still works — it shows the companies below at large
- * scale — and adding one sentence turns it into a proper opening statement.
+ * `title` is the positioning line. The one below is not new information: it is
+ * `identity.role` and `hero.subhead` compressed into something short enough to
+ * set at display size. Rewrite it in your own voice when you have a sharper
+ * one — it is the first full sentence a visitor reads. Empty is also valid;
+ * the panel then leads with the companies instead.
  * -------------------------------------------------------------------------*/
 
 export const intro = {
   eyebrow: 'What I do',
-  title: '',
+  title: 'I work where machine learning meets product.',
 };
 
 /* ---------------------------------------------------------------------------
@@ -122,11 +144,7 @@ export const intro = {
 export const logoBar = {
   caption: 'Worked with',
 
-  logos: [
-    'Cognimuse',
-    'Digichakra 360',
-    'Nextleap',
-  ],
+  logos: ['Cognimuse', 'Digichakra 360', 'Nextleap'],
 };
 
 /* ---------------------------------------------------------------------------
@@ -140,11 +158,16 @@ export type WorkItem = {
   tag: string;
   /** Your role. Optional: omitted rather than invented where unknown. */
   role?: string;
-  /** Empty means "not shown". Fill in when you have real dates. */
-  year: string;
   /** Tools/methods. Optional for the same reason as `role`. */
   stack?: string[];
   art: ArtVariant;
+  /**
+   * Optional path under /public. When absent — which is the case for every
+   * item right now — the generative `Artwork` canvas renders instead, keyed to
+   * `art`. Point this at a screenshot of the actual work (a wireframe, a UI, a
+   * page of the linked PDF) and it takes over. Do not point it at a company's
+   * logo or a stock photo; see the note above `workItems`.
+   */
   image?: string;
   links: {
     label: string;
@@ -152,6 +175,28 @@ export type WorkItem = {
   }[];
 };
 
+/**
+ * A note on `image`, because it will be tempting to put the old files back.
+ *
+ * This list previously carried eight images under /public/work. Every one was
+ * a third-party asset pulled off the web, and they were removed together:
+ *
+ *   - Two showed identifiable people who never agreed to appear here. One was
+ *     a stock portrait with a face-mesh overlay; the other paired a composite
+ *     sketch with what appears to be a booking photo.
+ *   - Four were other companies' trademarks — Discord's marketing artwork,
+ *     the Google Pay and BookMyShow logos, a Rapido office photo.
+ *   - One carried "2023 Rawpixel Ltd." in its EXIF copyright field.
+ *   - One was a Zostel promotional photo, visible watermark included, on a
+ *     project that has nothing to do with Zostel.
+ *
+ * None of them showed work by the author, which is the only thing a portfolio
+ * image is for. With `image` absent, the generative `Artwork` canvas renders
+ * instead: on-brand, rights-clean, and consistent across the set.
+ *
+ * The right replacement is a screenshot of the actual artefact — a wireframe
+ * frame, an app screen, a page from the linked PDF. One line per item.
+ */
 const workItems: WorkItem[] = [
   {
     title: 'Sketch to Image Conversion',
@@ -159,10 +204,8 @@ const workItems: WorkItem[] = [
       'An AI-powered tool that converts hand-drawn sketches into realistic images using deep learning techniques and generative adversarial networks.',
     tag: 'Machine Learning',
     role: 'ML Engineer',
-    year: '',
     stack: ['Python', 'TensorFlow', 'GANs', 'Computer Vision'],
     art: 'flow',
-    image: '/work/sketch-to-image.jpg',
     links: [
       { label: 'Live site', href: 'https://sketch-to-image-demo.vercel.app' },
       {
@@ -178,10 +221,8 @@ const workItems: WorkItem[] = [
       'A machine learning application that detects and recognizes faces in images and video streams with high accuracy using convolutional neural networks.',
     tag: 'Machine Learning',
     role: 'ML Engineer',
-    year: '',
     stack: ['Python', 'OpenCV', 'TensorFlow', 'Machine Learning'],
     art: 'lattice',
-    image: '/work/face-recognition.jpg',
     links: [
       { label: 'Live site', href: 'https://face-recognition-demo.vercel.app' },
       {
@@ -197,10 +238,8 @@ const workItems: WorkItem[] = [
       'Comprehensive wireframes for a travel planning assistant focusing on intuitive user experience and clean layout, with emphasis on user flows, information architecture, and accessibility.',
     tag: 'Wireframes',
     role: 'Product Designer',
-    year: '',
     stack: ['Wireframing', 'UX Design', 'Information Architecture'],
     art: 'contour',
-    image: '/work/travel-assistant.jpg',
     links: [
       {
         label: 'Project document',
@@ -215,7 +254,6 @@ const workItems: WorkItem[] = [
       'Designed and implemented an intelligent queueing system for high-traffic ticket sales that reduced booking drop-offs by 35%, improved user satisfaction and trust through identity verification, and addressed fairness with anti-bot protections.',
     tag: 'Case Study',
     role: 'Product Manager',
-    year: '',
     stack: [
       'Product Management',
       'System Design',
@@ -224,7 +262,6 @@ const workItems: WorkItem[] = [
       'High-Traffic Optimization',
     ],
     art: 'orbit',
-    image: '/work/smart-queue.jpg',
     links: [
       {
         label: 'Case study',
@@ -239,7 +276,6 @@ const workItems: WorkItem[] = [
       "An analysis of India's emerging space economy, uncovering key trends, rising startups, investment opportunities, and a product proposal focused on satellite-powered disaster management solutions.",
     tag: 'Market Research',
     role: 'Product Strategist',
-    year: '',
     stack: [
       'Market Research',
       'Satellite Applications',
@@ -248,7 +284,6 @@ const workItems: WorkItem[] = [
       'Disaster Management',
     ],
     art: 'contour',
-    image: '/work/space-economy.jpg',
     links: [
       {
         label: 'Research',
@@ -263,7 +298,6 @@ const workItems: WorkItem[] = [
       "A teardown of Rapido's 'Refer a Friend' feature, exploring how incentives, seamless sharing, and contextual prompts can drive user acquisition, along with recommendations for improving reward structure and conversion.",
     tag: 'Product Teardown',
     role: 'Product Analyst',
-    year: '',
     stack: [
       'Product Teardown',
       'Referral Program',
@@ -272,7 +306,6 @@ const workItems: WorkItem[] = [
       'Incentive Design',
     ],
     art: 'lattice',
-    image: '/work/rapido-referral.webp',
     links: [
       {
         label: 'Case study',
@@ -286,9 +319,8 @@ const workItems: WorkItem[] = [
     summary:
       'A focused teardown of how Discord uses push and in-app notifications to keep users engaged, from server alerts to personalized mentions.',
     tag: 'Product Teardown',
-    year: '',
+    role: 'Product Manager',
     art: 'orbit',
-    image: '/work/discord-notifications.jpg',
     links: [
       {
         label: 'Teardown',
@@ -302,9 +334,8 @@ const workItems: WorkItem[] = [
     summary:
       "A detailed teardown of Google Pay's user experience using Nielsen's usability heuristics to identify strengths and areas for improvement.",
     tag: 'Product Teardown',
-    year: '',
+    role: 'Product Manager',
     art: 'flow',
-    image: '/work/gpay-heuristic.webp',
     links: [
       {
         label: 'Teardown',
@@ -319,10 +350,9 @@ export const work = {
    * Filter pills are derived from the `tag` values above — adding an item with
    * a new tag creates its chip automatically, with no second list to maintain.
    *
-   * `year` is empty on every item because the source data said "Date not
-   * specified", which carried no information and read badly in a prominent
-   * position. The sequence is numbered instead. Fill any `year` in and it
-   * appears beside the number.
+   * There is no date field. The source data had none, and the sequence is
+   * numbered instead, which carries the same "there is a body of work here"
+   * signal without asserting a timeline.
    */
   eyebrow: 'Selected work',
 
@@ -339,13 +369,9 @@ export const work = {
  * -------------------------------------------------------------------------*/
 
 export const statement = {
-  lines: [
-    'Build',
-    'with purpose.',
-  ],
+  lines: ['Build', 'with purpose.'],
 
-  note:
-    'Combining technology, product thinking, and curiosity to solve meaningful problems.',
+  note: 'Combining technology, product thinking, and curiosity to solve meaningful problems.',
 };
 
 /* ---------------------------------------------------------------------------
@@ -537,11 +563,9 @@ export const contact = {
  * -------------------------------------------------------------------------*/
 
 export const footer = {
-  note:
-    'ML Engineer | Product Manager | Developer',
+  note: 'ML Engineer | Product Manager | Developer',
 
   name: 'Gautham N Holla',
 
-  copyright:
-    '© Gautham N Holla. All rights reserved.',
+  copyright: '© Gautham N Holla. All rights reserved.',
 };

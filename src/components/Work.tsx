@@ -36,7 +36,8 @@ export function Work() {
   );
 
   const visible = useMemo(
-    () => (filter === ALL ? work.items : work.items.filter((i) => i.tag === filter)),
+    () =>
+      filter === ALL ? work.items : work.items.filter((i) => i.tag === filter),
     [filter],
   );
 
@@ -95,12 +96,6 @@ export function Work() {
                   <span className="text-caption text-twilight-soft">
                     {item.tag}
                   </span>
-                  {/* Renders only when the year holds a real value. */}
-                  {item.year ? (
-                    <span className="text-caption tabular-nums text-whiteout/55">
-                      {item.year}
-                    </span>
-                  ) : null}
                 </div>
 
                 <TextReveal
@@ -147,7 +142,10 @@ export function Work() {
                       </span>
                     ) : null}
                     {item.stack?.map((tech) => (
-                      <span key={tech} className="text-caption text-whiteout/60">
+                      <span
+                        key={tech}
+                        className="text-caption text-whiteout/60"
+                      >
                         · {tech}
                       </span>
                     ))}

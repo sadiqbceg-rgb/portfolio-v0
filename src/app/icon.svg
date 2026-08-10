@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="GNH">
+  <!-- Monogram mark. The G is drawn as geometry rather than set as type: a
+       favicon is rendered before any webfont is available, so a <text> element
+       would fall back to whatever the OS happens to have and the mark would
+       change shape between machines.
+
+       Signal blue rather than the site's black, because a black icon
+       disappears against a dark browser tab. This colour holds in both. -->
+  <rect width="64" height="64" rx="14" fill="#2b7fff" />
+  <path
+    d="M44.5 20 A17.5 17.5 0 1 0 44.5 44 L44.5 33 L34 33"
+    fill="none"
+    stroke="#ffffff"
+    stroke-width="8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
