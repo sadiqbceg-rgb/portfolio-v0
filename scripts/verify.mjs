@@ -132,7 +132,12 @@ for (const mode of MODES) {
         .querySelector(`[data-verify-candidate="${n}"]`)
         ?.scrollIntoView({ block: 'center' });
     }, i);
-    await page.waitForTimeout(600);
+    /* Must outlast the slowest reveal on the page, or this check reports
+       elements that are simply still animating. 600ms did exactly that: the
+       Statement note is duration 0.6 + delay 0.2 = 800ms, so it was caught
+       mid-flight and failed the run at random. The longest is TextReveal at
+       0.75s plus staggered delays approaching 0.45s. */
+    await page.waitForTimeout(1500);
 
     const verdict = await page.evaluate((n) => {
       const el = document.querySelector(`[data-verify-candidate="${n}"]`);

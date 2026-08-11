@@ -248,24 +248,26 @@ export function HeroScene({
 
     /* --- Sizing ---------------------------------------------------------- */
     /**
-     * Horizontal placement, as a fraction of the visible half-width rather
-     * than a fixed world offset.
+     * The form is centred on the viewport, not offset into a column.
      *
-     * A fixed offset does not survive a change of viewport: the frustum is
-     * narrower on a laptop than on a wide monitor, so the same number pushes
-     * the form progressively closer to the edge as the window narrows. It had
-     * been pinned at 1.4, which put it hard against the right edge and read as
-     * decoration parked in a corner rather than the subject of the shot.
+     * This is the object's own position in the scene — `group.position.x` in
+     * the render loop — not a camera shift and not CSS. The canvas is
+     * `absolute inset-0` inside a full-bleed section, so the frustum is
+     * centred on the viewport and x = 0 puts the object's centre at 50vw by
+     * construction, at every width, with nothing to keep in sync.
      *
-     * 0.28 lands the centre around 65% across — right of centre, clear of the
-     * copy column's centre of gravity, and far enough from the edge that the
-     * form reads as placed rather than escaping.
+     * Earlier versions pushed it right to sit beside the copy. It now sits
+     * behind the copy instead, which is why `baseOpacity` below is lower than
+     * it was: a backdrop has to lose the contrast fight with the text on top
+     * of it, deliberately and every time.
      */
-    const OFFSET_FRACTION = 0.28;
     // Declared here rather than beside the loop: `resize()` runs immediately
     // below and reads it, so a later `const` would be in its dead zone.
     const BASE_FOV = 45;
-    let offsetX = 0;
+    /** Base size, independent of placement — the two were previously tied. */
+    let baseScale = 0.92;
+    /** Strength of the form as a backdrop. Lower where text sits over it. */
+    let baseOpacity = 1;
     // Rest positions the scroll choreography moves away from. Held separately
     // because the loop offsets the camera every frame, and resize must not
     // read back a value the loop already displaced.
@@ -280,36 +282,21 @@ export function HeroScene({
      * either way.
      */
     let motionScale = 1;
-    /**
-     * How strongly the form is drawn.
-     *
-     * Below 900px there is no free column, so the form recentres and sits
-     * directly behind the headline and body copy instead of beside them. At
-     * full strength it competes with the text it is meant to sit behind, so
-     * narrow viewports get a quieter version. The scrim above it is a
-     * left-to-right gradient, which does nothing for a centred form.
-     */
-    let opacityScale = 1;
 
     const resize = () => {
       const { width, height } = mount.getBoundingClientRect();
       if (!width || !height) return;
       motionScale = width < 720 ? 0.5 : width < 1000 ? 0.75 : 1;
-      opacityScale = width < 900 ? 0.55 : 1;
+      // Narrow viewports stack the copy over the middle of the form rather
+      // than beside it, so it has to sit further back to stay out of the way.
+      baseScale = width < 900 ? 0.78 : 0.92;
+      baseOpacity = width < 900 ? 0.45 : 0.7;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       // Pull the camera back on narrow viewports so the form is never cropped.
       baseCameraZ = width < 720 ? 6.2 : 4.6;
       camera.updateProjectionMatrix();
-
-      // Half the frustum width at the object's depth, which is what the
-      // placement is measured against.
-      const halfWidth =
-        baseCameraZ * Math.tan((BASE_FOV * Math.PI) / 180 / 2) * camera.aspect;
-      // Below 900px there is no free column to sit beside, so it recentres and
-      // the copy sits over it — quietened by `opacityScale` above.
-      offsetX = width < 900 ? 0 : halfWidth * OFFSET_FRACTION;
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
@@ -398,15 +385,16 @@ export function HeroScene({
       // Grows and lifts as the hero leaves, rather than shrinking away: with
       // the opacity dissolve below, growing reads as the form passing the
       // camera, which is a handoff. Shrinking just reads as leaving.
-      group.scale.setScalar((offsetX ? 0.92 : 0.78) * (1 + p * 0.14 * m));
+      group.scale.setScalar(baseScale * (1 + p * 0.14 * m));
       group.position.y = p * 0.9 * m;
-      // Drifts outward, away from the copy column — never toward it.
-      group.position.x = offsetX + p * 0.3 * m;
+      // Starts centred on the viewport and drifts only slightly, so it stays
+      // read as the centre of the composition rather than sliding out of it.
+      group.position.x = p * 0.18 * m;
 
       // Hold at full strength through the first half, then dissolve. Fading
       // from the very start would leave the middle of the shot — where the
       // rotation is most interesting — already half gone.
-      const fade = (1 - smoothstep(0.55, 1, shot)) * opacityScale;
+      const fade = (1 - smoothstep(0.55, 1, shot)) * baseOpacity;
       uniforms.uOpacity.value = 0.4 * fade;
       pointUniforms.uOpacity.value = 0.9 * fade;
 

@@ -72,19 +72,25 @@ export function Hero() {
         {backdrop === '3d' ? (
           <>
             <HeroScene progress={scene.progress} />
-            {/* Scrim: the wireframe runs bright where it crosses the headline,
-                so the text needs a floor under it to hold its contrast.
+            {/* Scrim: the wireframe crosses the type everywhere now, so the
+                text needs a floor under it to hold its contrast.
 
-                The dark stops reach further right than they used to. The form
-                now sits around 65% across rather than hard against the edge,
-                which puts its brightest region over the end of the headline —
-                the old ramp had already fallen to 0.42 by there. Contrast is
-                measured, not eyeballed: see `npm run verify`. */}
+                This used to be a left-to-right ramp, which made sense while
+                the form sat in the right column — dark where the copy was,
+                clear where the form was. With the form centred on the viewport
+                that logic inverts: a directional gradient now leaves its
+                brightest region sitting under the middle of the headline.
+
+                So it is a flat veil plus a soft radial that is strongest at
+                the centre, exactly where the densest part of the mesh sits.
+                Both copy column and meta rail get equal protection, which a
+                one-directional ramp cannot give them. Contrast is measured,
+                not eyeballed: see `npm run verify`. */}
             <div
               className="absolute inset-0 -z-10"
               style={{
                 background:
-                  'linear-gradient(100deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.90) 42%, rgba(0,0,0,0.62) 66%, rgba(0,0,0,0.34) 100%)',
+                  'radial-gradient(58% 62% at 50% 50%, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.60) 55%, rgba(0,0,0,0.42) 100%), rgba(0,0,0,0.30)',
               }}
             />
           </>
