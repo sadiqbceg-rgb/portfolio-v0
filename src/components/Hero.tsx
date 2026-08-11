@@ -73,12 +73,18 @@ export function Hero() {
           <>
             <HeroScene progress={scene.progress} />
             {/* Scrim: the wireframe runs bright where it crosses the headline,
-                so the text needs a floor under it to hold its contrast. */}
+                so the text needs a floor under it to hold its contrast.
+
+                The dark stops reach further right than they used to. The form
+                now sits around 65% across rather than hard against the edge,
+                which puts its brightest region over the end of the headline —
+                the old ramp had already fallen to 0.42 by there. Contrast is
+                measured, not eyeballed: see `npm run verify`. */}
             <div
               className="absolute inset-0 -z-10"
               style={{
                 background:
-                  'linear-gradient(100deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.86) 34%, rgba(0,0,0,0.42) 58%, rgba(0,0,0,0.30) 100%)',
+                  'linear-gradient(100deg, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.90) 42%, rgba(0,0,0,0.62) 66%, rgba(0,0,0,0.34) 100%)',
               }}
             />
           </>

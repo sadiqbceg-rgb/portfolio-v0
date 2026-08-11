@@ -247,9 +247,24 @@ export function HeroScene({
     scene.add(group);
 
     /* --- Sizing ---------------------------------------------------------- */
-    // The copy is left-aligned, so on wide viewports the form is pushed into
-    // the right third rather than sitting behind the headline. On narrow ones
-    // it recentres, because there is no free column to move into.
+    /**
+     * Horizontal placement, as a fraction of the visible half-width rather
+     * than a fixed world offset.
+     *
+     * A fixed offset does not survive a change of viewport: the frustum is
+     * narrower on a laptop than on a wide monitor, so the same number pushes
+     * the form progressively closer to the edge as the window narrows. It had
+     * been pinned at 1.4, which put it hard against the right edge and read as
+     * decoration parked in a corner rather than the subject of the shot.
+     *
+     * 0.28 lands the centre around 65% across — right of centre, clear of the
+     * copy column's centre of gravity, and far enough from the edge that the
+     * form reads as placed rather than escaping.
+     */
+    const OFFSET_FRACTION = 0.28;
+    // Declared here rather than beside the loop: `resize()` runs immediately
+    // below and reads it, so a later `const` would be in its dead zone.
+    const BASE_FOV = 45;
     let offsetX = 0;
     // Rest positions the scroll choreography moves away from. Held separately
     // because the loop offsets the camera every frame, and resize must not
@@ -279,7 +294,6 @@ export function HeroScene({
     const resize = () => {
       const { width, height } = mount.getBoundingClientRect();
       if (!width || !height) return;
-      offsetX = width < 900 ? 0 : 1.4;
       motionScale = width < 720 ? 0.5 : width < 1000 ? 0.75 : 1;
       opacityScale = width < 900 ? 0.55 : 1;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -288,6 +302,14 @@ export function HeroScene({
       // Pull the camera back on narrow viewports so the form is never cropped.
       baseCameraZ = width < 720 ? 6.2 : 4.6;
       camera.updateProjectionMatrix();
+
+      // Half the frustum width at the object's depth, which is what the
+      // placement is measured against.
+      const halfWidth =
+        baseCameraZ * Math.tan((BASE_FOV * Math.PI) / 180 / 2) * camera.aspect;
+      // Below 900px there is no free column to sit beside, so it recentres and
+      // the copy sits over it — quietened by `opacityScale` above.
+      offsetX = width < 900 ? 0 : halfWidth * OFFSET_FRACTION;
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
@@ -329,7 +351,6 @@ export function HeroScene({
     }
 
     /* --- Loop ------------------------------------------------------------ */
-    const BASE_FOV = 45;
     const clock = new THREE.Clock();
     let frame = 0;
     let visible = true;

@@ -189,6 +189,16 @@ export type WorkItem = {
    * the generative `Artwork` canvas renders instead, keyed to `art`.
    */
   image?: string;
+  /**
+   * Which part of the image survives the crop.
+   *
+   * The card is 16:11 and images rarely are, so `object-fit: cover` trims the
+   * overflowing axis from both edges. Centred is right most of the time, but
+   * not when the subject sits against one edge — the Rapido photo has its
+   * logo hard against the left, and centring sliced the first letter off, so
+   * it read as "apido".
+   */
+  imagePosition?: 'left' | 'center' | 'right';
   links: {
     label: string;
     href: string;
@@ -358,6 +368,7 @@ const workItems: WorkItem[] = [
     ],
     art: 'lattice',
     image: '/work/rapido-referral.webp',
+    imagePosition: 'left',
     links: [
       {
         label: 'Case study',

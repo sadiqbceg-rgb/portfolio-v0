@@ -25,7 +25,14 @@ import { about, identity } from '@/content/site';
 export function About() {
   const reduced = useReducedMotion();
   const scene = useScene();
-  const portraitY = useSceneRange(scene, [0, 1], ['-6%', '6%'], '0%');
+  /* Kept small on purpose. The inner layer is oversized so the drift never
+   * exposes an edge, which means whatever the overscan and the drift add up
+   * to is permanently cropped off the top of the portrait. At 8% overscan and
+   * 6% drift that was up to 14%, and the subject's hair sits about 5% down —
+   * so the top of his head was being cut off. 4% + 3% keeps the crop under
+   * half of what it was; the portrait itself was also regenerated with extra
+   * headroom. Both were needed: either alone still clipped. */
+  const portraitY = useSceneRange(scene, [0, 1], ['-3%', '3%'], '0%');
 
   return (
     <section id="about" className="py-section-lg">
@@ -76,7 +83,7 @@ export function About() {
                   exposes an edge inside the frame. */}
               <motion.div
                 style={{ y: portraitY }}
-                className="absolute inset-x-0 -inset-y-[8%]"
+                className="absolute inset-x-0 -inset-y-[4%]"
               >
                 {about.portrait ? (
                   <Image

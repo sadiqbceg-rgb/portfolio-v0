@@ -31,7 +31,16 @@ export type MediaItem = {
   title: string;
   art: ArtVariant;
   image?: string;
+  imagePosition?: 'left' | 'center' | 'right';
 };
+
+/* Tailwind scans source for whole class names, so these cannot be built by
+   interpolation — a template literal would compile to nothing. */
+const OBJECT_POSITION = {
+  left: 'object-left',
+  center: 'object-center',
+  right: 'object-right',
+} as const;
 
 export function StickyMedia({
   items,
@@ -71,7 +80,7 @@ export function StickyMedia({
             alt={`${item.title} — project visual`}
             fill
             sizes="(min-width: 1000px) 44vw, 100vw"
-            className="object-cover"
+            className={`object-cover ${OBJECT_POSITION[item.imagePosition ?? 'center']}`}
             onError={() => {
               console.warn(
                 `[work] image failed to load: ${src} — check that the file exists in public${src} and that the name matches exactly (case included). Falling back to generated artwork.`,
