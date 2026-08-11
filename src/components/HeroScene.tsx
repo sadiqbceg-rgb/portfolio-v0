@@ -12,9 +12,31 @@ import * as THREE from 'three';
  * rest of the site is hairlines, contour lines and node graphs, and a chrome
  * blob would belong to a different design system.
  *
- * Scroll drives the whole shot. As the hero leaves the viewport the form
- * rotates, recedes and drifts upward, so the 3D reads as one continuous camera
- * move rather than an ambient loop that happens to be playing.
+ * Scroll drives the whole shot, and nothing else does. There is deliberately
+ * no time-based rotation: an object that spins on its own reads as a widget
+ * playing in the corner, while one that only moves when you scroll reads as a
+ * camera you are steering. The only motion at rest is the surface breathing
+ * under the noise field, which is what stops it looking like a still image.
+ *
+ * THE SHOT
+ *
+ *   0.0 – 0.2   barely moves; the headline is still being read
+ *   0.2 – 0.6   rotation opens up across all three axes, the form grows and
+ *               lifts, and the camera widens — the middle of the move
+ *   0.6 – 1.0   settles into its final orientation and dissolves out, handing
+ *               off to the Intro panel sliding up over it
+ *
+ * Two things make it feel like film rather than a slider:
+ *
+ *   - scroll is SMOOTHED before use. The raw value snaps with a trackpad
+ *     flick; easing toward it means a fast scroll still arrives smoothly and
+ *     the form never jumps.
+ *   - the smoothed value is then EASED (cubic in-out), so the move is slow at
+ *     both ends and quickest through the middle. Linear scroll mapping is the
+ *     single biggest reason this kind of effect reads as cheap.
+ *
+ * Reversing is free: everything is a pure function of scroll position, so
+ * scrolling back up runs the same curve backwards with no extra state.
  *
  * Performance notes, in order of how much they matter:
  *   - the render loop stops entirely when the hero scrolls out of view
@@ -111,6 +133,26 @@ void main() {
   gl_FragColor = vec4(color, uOpacity);
 }
 `;
+
+/** Cubic in-out: slow at both ends, quickest through the middle. */
+const easeInOutCubic = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/** GLSL-style smoothstep, used to hold the form solid before dissolving it. */
+const smoothstep = (edge0: number, edge1: number, x: number) => {
+  const t = Math.min(Math.max((x - edge0) / (edge1 - edge0), 0), 1);
+  return t * t * (3 - 2 * t);
+};
+
+/**
+ * Frame-rate independent lerp factor.
+ *
+ * A fixed `value += (target - value) * 0.09` converges twice as fast on a
+ * 120Hz display as on 60Hz, so the same scroll feels different on different
+ * machines. This rescales the rate by actual frame time, expressed as "what
+ * 0.09 per frame would mean at 60fps".
+ */
+const damp = (rate: number, dt: number) => 1 - Math.pow(1 - rate, dt * 60);
 
 export function HeroScene({
   className = '',
@@ -209,15 +251,42 @@ export function HeroScene({
     // the right third rather than sitting behind the headline. On narrow ones
     // it recentres, because there is no free column to move into.
     let offsetX = 0;
+    // Rest positions the scroll choreography moves away from. Held separately
+    // because the loop offsets the camera every frame, and resize must not
+    // read back a value the loop already displaced.
+    let baseCameraZ = 4.6;
+    /**
+     * How much of the choreography a viewport gets.
+     *
+     * A phone shows the same move in a third of the width, so the identical
+     * rotation and drift read as far more violent and make the page feel like
+     * it is fighting the thumb. Scaling the deltas keeps the shot recognisable
+     * while staying comfortable, and costs nothing — the same maths runs
+     * either way.
+     */
+    let motionScale = 1;
+    /**
+     * How strongly the form is drawn.
+     *
+     * Below 900px there is no free column, so the form recentres and sits
+     * directly behind the headline and body copy instead of beside them. At
+     * full strength it competes with the text it is meant to sit behind, so
+     * narrow viewports get a quieter version. The scrim above it is a
+     * left-to-right gradient, which does nothing for a centred form.
+     */
+    let opacityScale = 1;
+
     const resize = () => {
       const { width, height } = mount.getBoundingClientRect();
       if (!width || !height) return;
       offsetX = width < 900 ? 0 : 1.4;
+      motionScale = width < 720 ? 0.5 : width < 1000 ? 0.75 : 1;
+      opacityScale = width < 900 ? 0.55 : 1;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       // Pull the camera back on narrow viewports so the form is never cropped.
-      camera.position.z = width < 720 ? 6.2 : 4.6;
+      baseCameraZ = width < 720 ? 6.2 : 4.6;
       camera.updateProjectionMatrix();
     };
     resize();
@@ -260,43 +329,99 @@ export function HeroScene({
     }
 
     /* --- Loop ------------------------------------------------------------ */
+    const BASE_FOV = 45;
     const clock = new THREE.Clock();
     let frame = 0;
     let visible = true;
+    let elapsed = 0;
+    // Trails `scrollProgress`. Starting it level with the target means the
+    // first frame is already correct rather than easing in from zero.
+    let eased = scrollProgress;
+    let lastFov = BASE_FOV;
 
-    const renderFrame = () => {
-      const elapsed = clock.getElapsedTime();
+    const renderFrame = (dt: number) => {
+      // getDelta() and getElapsedTime() both advance the clock internally, so
+      // calling both per frame double-counts. Accumulate from the delta.
+      elapsed += dt;
       uniforms.uTime.value = elapsed;
       pointUniforms.uTime.value = elapsed;
 
+      // Smooth the raw scroll value before anything reads it: a trackpad
+      // flick delivers large jumps, and mapping those straight onto rotation
+      // is what makes scroll-driven 3D look janky.
+      eased += (scrollProgress - eased) * damp(0.09, dt);
+
       // Pointer parallax, eased so it trails the cursor rather than snapping.
-      pointerX += (targetPointerX - pointerX) * 0.05;
-      pointerY += (targetPointerY - pointerY) * 0.05;
+      const pointerDamp = damp(0.05, dt);
+      pointerX += (targetPointerX - pointerX) * pointerDamp;
+      pointerY += (targetPointerY - pointerY) * pointerDamp;
 
-      const p = scrollProgress;
-      group.rotation.y = elapsed * 0.12 + p * Math.PI * 1.15 + pointerX * 0.35;
-      group.rotation.x = pointerY * 0.25 + p * 0.5;
-      // Recede and lift as the hero leaves — the exit is the scroll payoff.
-      group.scale.setScalar((offsetX ? 0.92 : 0.78) * (1 - p * 0.42));
-      group.position.y = p * 1.1;
-      group.position.x = offsetX + p * -0.35;
+      /* The hero is sticky and the Intro panel slides up over it, which means
+       * the form is fully covered by roughly 60% of the hero's scroll range.
+       * Mapping the choreography across the full 0..1 would spend its whole
+       * second half — the part with the most rotation — hidden behind that
+       * panel. Compressing it into the window that is actually on screen is
+       * what makes the move readable without lengthening the page. */
+      const shot = Math.min(eased / 0.6, 1);
+      const p = easeInOutCubic(shot);
+      const m = motionScale;
 
-      uniforms.uOpacity.value = 0.4 * (1 - p * 0.85);
-      pointUniforms.uOpacity.value = 0.9 * (1 - p * 0.85);
-      uniforms.uAmplitude.value = 0.32 + p * 0.22;
-      pointUniforms.uAmplitude.value = uniforms.uAmplitude.value;
+      // Rotation on all three axes, but restrained — well under a half turn
+      // on the widest, so the form reorients rather than spins. Pointer
+      // parallax is added on top rather than replacing it, so the mouse
+      // nudges the shot without ever taking it over.
+      group.rotation.y = p * Math.PI * 0.85 * m + pointerX * 0.35;
+      group.rotation.x = p * 0.42 * m + pointerY * 0.25;
+      group.rotation.z = p * 0.18 * m;
+
+      // Grows and lifts as the hero leaves, rather than shrinking away: with
+      // the opacity dissolve below, growing reads as the form passing the
+      // camera, which is a handoff. Shrinking just reads as leaving.
+      group.scale.setScalar((offsetX ? 0.92 : 0.78) * (1 + p * 0.14 * m));
+      group.position.y = p * 0.9 * m;
+      // Drifts outward, away from the copy column — never toward it.
+      group.position.x = offsetX + p * 0.3 * m;
+
+      // Hold at full strength through the first half, then dissolve. Fading
+      // from the very start would leave the middle of the shot — where the
+      // rotation is most interesting — already half gone.
+      const fade = (1 - smoothstep(0.55, 1, shot)) * opacityScale;
+      uniforms.uOpacity.value = 0.4 * fade;
+      pointUniforms.uOpacity.value = 0.9 * fade;
+
+      // Surface turbulence rises through the move, so the form feels like it
+      // is gaining energy as it exits.
+      const amplitude = 0.32 + p * 0.26 * m;
+      uniforms.uAmplitude.value = amplitude;
+      pointUniforms.uAmplitude.value = amplitude;
+
+      // Camera: a short dolly in with a widening lens. Changing both together
+      // exaggerates perspective as the shot progresses, which is what sells
+      // depth on a wireframe that has no shading to read it from.
+      camera.position.z = baseCameraZ - p * 0.5 * m;
+      const fov = BASE_FOV + p * 6 * m;
+      // updateProjectionMatrix() is only worth calling when the lens actually
+      // moved — at rest, and once the shot settles, this is a no-op.
+      if (Math.abs(fov - lastFov) > 0.01) {
+        camera.fov = fov;
+        camera.updateProjectionMatrix();
+        lastFov = fov;
+      }
 
       renderer.render(scene, camera);
     };
 
     const tick = () => {
-      renderFrame();
+      // Clamped so a backgrounded tab returning after seconds does not apply
+      // one enormous smoothing step and snap everything into place.
+      renderFrame(Math.min(clock.getDelta(), 0.1));
       frame = requestAnimationFrame(tick);
     };
 
     if (reduceMotion) {
-      // One frame, no loop: the form is present but completely still.
-      renderFrame();
+      // One frame, no loop: the form is present but completely still. dt of 0
+      // holds the smoothing where it starts, so this renders the rest pose.
+      renderFrame(0);
     } else {
       // Only run while the hero is on screen. Scrolling to the contact form
       // should not keep a GPU loop alive.

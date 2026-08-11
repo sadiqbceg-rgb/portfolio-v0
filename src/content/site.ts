@@ -87,7 +87,7 @@ export const hero = {
    */
   background: '3d' as '3d' | 'stars' | ArtVariant,
 
-  eyebrow: 'ML Engineer · Product Manager · Developer',
+  eyebrow: 'ML Engineer · Product · Developer',
 
   headline: [
     {
@@ -101,7 +101,7 @@ export const hero = {
   ],
 
   subhead:
-    'I build intelligent systems and user-centric products that solve real-world problems using machine learning, technology, and product thinking.',
+    'I work across AI, web development, IT infrastructure, and digital solutions — combining technical skills with product thinking to build practical, user-focused solutions.',
 
   actions: [
     {
@@ -114,12 +114,26 @@ export const hero = {
     },
   ],
 
-  /** Right-hand rail of the hero. Short, factual lines. */
+  /**
+   * Right-hand rail of the hero. Short, factual lines.
+   *
+   * `value` takes an array when a row has several entries — they render as
+   * separate lines rather than one comma-run, which is what stops a four-item
+   * list from wrapping into an unreadable block in a 17rem column.
+   */
   meta: [
-    { label: 'Role', value: 'ML Engineer · Product Manager' },
+    { label: 'Role', value: 'Developer · IT Solutions · AI & Technology' },
     { label: 'Based in', value: 'Riyadh, Saudi Arabia' },
-    { label: 'Focus', value: 'Machine learning, product thinking' },
-  ],
+    {
+      label: 'Focus',
+      value: [
+        'AI & Machine Learning',
+        'Web Development',
+        'IT Infrastructure & Networking',
+        'Digital Content & Automation',
+      ],
+    },
+  ] satisfies { label: string; value: string | string[] }[],
 };
 
 /* ---------------------------------------------------------------------------

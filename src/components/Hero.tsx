@@ -14,9 +14,12 @@ import { hero, identity } from '@/content/site';
 /* Three.js is ~150kB gzipped. Loading it dynamically keeps it out of the main
  * bundle unless hero.background is set to '3d', so every other backdrop costs
  * nothing. ssr:false because the scene needs a real canvas to exist first. */
-const HeroScene = dynamic(() => import('./HeroScene').then((m) => m.HeroScene), {
-  ssr: false,
-});
+const HeroScene = dynamic(
+  () => import('./HeroScene').then((m) => m.HeroScene),
+  {
+    ssr: false,
+  },
+);
 
 /* ============================================================================
  * HERO — the entrance.
@@ -89,7 +92,9 @@ export function Hero() {
         ) : (
           <Atmosphere
             uid="hero"
-            variant={(backdrop === 'stars' ? 'contour' : backdrop) as ArtVariant}
+            variant={
+              (backdrop === 'stars' ? 'contour' : backdrop) as ArtVariant
+            }
           />
         )}
 
@@ -190,7 +195,16 @@ export function Hero() {
                   <dt className="text-caption uppercase tracking-[0.14em] text-whiteout/55">
                     {row.label}
                   </dt>
-                  <dd className="text-body text-whiteout/85">{row.value}</dd>
+                  {/* A row with several entries lists them, one per line. */}
+                  {Array.isArray(row.value) ? (
+                    <dd className="text-body flex flex-col gap-0.5 text-whiteout/85">
+                      {row.value.map((line) => (
+                        <span key={line}>{line}</span>
+                      ))}
+                    </dd>
+                  ) : (
+                    <dd className="text-body text-whiteout/85">{row.value}</dd>
+                  )}
                 </div>
               ))}
             </motion.dl>
