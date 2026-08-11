@@ -192,18 +192,16 @@ export type WorkItem = {
  * `public` is the web root, so it never appears in the URL. That is the whole
  * rule, and getting it wrong is the usual reason an image "does not show".
  *
- * These files arrived as `public/Work/It solutions.jpg` and were renamed on
- * the way in, for two reasons worth remembering before adding more:
+ * Two rules, both of which this folder has already broken once:
  *
- *   - The directory was `Work`, the code asks for `/work/`. Windows and macOS
- *     ignore that difference; Linux, which is what nearly every host runs,
- *     does not. It works locally and 404s in production.
- *   - The filename had a space and a capital, so the URL needed
- *     `/work/It%20solutions.jpg`. Encoded spaces survive a dev server but not
- *     reliably every CDN.
+ *   - Lowercase everything, the directory included. A capitalised directory
+ *     name resolves fine on Windows and macOS and fails on Linux, which is
+ *     what the host runs — so it works locally and 404s only in production.
+ *   - No spaces, and match the extension exactly. A space has to be
+ *     percent-encoded, which survives a dev server but not reliably every
+ *     CDN; and a `.jpg` file referenced with a `.jpeg` extension is a 404.
  *
- * So: lowercase, hyphens, no spaces, and match the extension exactly — a
- * `.jpg` file referenced as `.jpeg` is still a 404.
+ * See public/work/README.md for the current file list.
  *
  * Leave `image` off and the generative `Artwork` canvas renders instead, keyed
  * to `art`. If a file is named here but missing at runtime, the card falls
