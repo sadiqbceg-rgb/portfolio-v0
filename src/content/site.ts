@@ -171,11 +171,8 @@ export type WorkItem = {
   stack?: string[];
   art: ArtVariant;
   /**
-   * Optional path under /public. When absent — which is the case for every
-   * item right now — the generative `Artwork` canvas renders instead, keyed to
-   * `art`. Point this at a screenshot of the actual work (a wireframe, a UI, a
-   * page of the linked PDF) and it takes over. Do not point it at a company's
-   * logo or a stock photo; see the note above `workItems`.
+   * Optional path under /public — see the note above `workItems`. When absent,
+   * the generative `Artwork` canvas renders instead, keyed to `art`.
    */
   image?: string;
   links: {
@@ -190,18 +187,23 @@ export type WorkItem = {
  * Put the file in `public/work/`, then set `image` on that item to the path
  * WITHOUT the `public` prefix:
  *
- *     public/work/it-solutions.jpeg   ->   image: '/work/it-solutions.jpeg'
+ *     public/work/it-solutions.jpg   ->   image: '/work/it-solutions.jpg'
  *
  * `public` is the web root, so it never appears in the URL. That is the whole
  * rule, and getting it wrong is the usual reason an image "does not show".
  *
- * Use web-safe filenames: lowercase, hyphens, no spaces. A space has to be
- * percent-encoded (`it%20solutions.jpeg`) and survives a local dev server but
- * not reliably every CDN, so it is not worth the risk.
+ * These files arrived as `public/Work/It solutions.jpg` and were renamed on
+ * the way in, for two reasons worth remembering before adding more:
  *
- * Filenames are case-sensitive once deployed, even though Windows will happily
- * serve `IT-Solutions.JPEG` for `it-solutions.jpeg` locally. Match the case
- * exactly.
+ *   - The directory was `Work`, the code asks for `/work/`. Windows and macOS
+ *     ignore that difference; Linux, which is what nearly every host runs,
+ *     does not. It works locally and 404s in production.
+ *   - The filename had a space and a capital, so the URL needed
+ *     `/work/It%20solutions.jpg`. Encoded spaces survive a dev server but not
+ *     reliably every CDN.
+ *
+ * So: lowercase, hyphens, no spaces, and match the extension exactly — a
+ * `.jpg` file referenced as `.jpeg` is still a 404.
  *
  * Leave `image` off and the generative `Artwork` canvas renders instead, keyed
  * to `art`. If a file is named here but missing at runtime, the card falls
@@ -223,7 +225,7 @@ const workItems: WorkItem[] = [
       'IT Support',
     ],
     art: 'lattice',
-    image: '/work/it-solutions.jpeg',
+    image: '/work/it-solutions.jpg',
     links: [
       { label: 'Project Details', href: '#' },
       { label: 'View Solutions', href: '#' },
@@ -238,6 +240,7 @@ const workItems: WorkItem[] = [
     role: 'ML Engineer',
     stack: ['Python', 'TensorFlow', 'GANs', 'Computer Vision'],
     art: 'flow',
+    image: '/work/sketch-to-image.jpg',
     links: [
       { label: 'Live site', href: 'https://sketch-to-image-demo.vercel.app' },
       {
@@ -255,6 +258,7 @@ const workItems: WorkItem[] = [
     role: 'ML Engineer',
     stack: ['Python', 'OpenCV', 'TensorFlow', 'Machine Learning'],
     art: 'lattice',
+    image: '/work/face-recognition.jpg',
     links: [
       { label: 'Live site', href: 'https://face-recognition-demo.vercel.app' },
       {
@@ -272,6 +276,7 @@ const workItems: WorkItem[] = [
     role: 'Product Designer',
     stack: ['Wireframing', 'UX Design', 'Information Architecture'],
     art: 'contour',
+    image: '/work/travel-assistant.jpg',
     links: [
       {
         label: 'Project document',
@@ -294,6 +299,7 @@ const workItems: WorkItem[] = [
       'High-Traffic Optimization',
     ],
     art: 'orbit',
+    image: '/work/smart-queue.jpg',
     links: [
       {
         label: 'Case study',
@@ -316,6 +322,7 @@ const workItems: WorkItem[] = [
       'Disaster Management',
     ],
     art: 'contour',
+    image: '/work/space-economy.jpg',
     links: [
       {
         label: 'Research',
@@ -338,6 +345,7 @@ const workItems: WorkItem[] = [
       'Incentive Design',
     ],
     art: 'lattice',
+    image: '/work/rapido-referral.webp',
     links: [
       {
         label: 'Case study',
@@ -353,6 +361,7 @@ const workItems: WorkItem[] = [
     tag: 'Product Teardown',
     role: 'Product Manager',
     art: 'orbit',
+    image: '/work/discord-notifications.jpg',
     links: [
       {
         label: 'Teardown',
@@ -368,6 +377,7 @@ const workItems: WorkItem[] = [
     tag: 'Product Teardown',
     role: 'Product Manager',
     art: 'flow',
+    image: '/work/gpay-heuristic.webp',
     links: [
       {
         label: 'Teardown',
