@@ -65,7 +65,7 @@ export function Nav() {
             hold the layout so nothing shifts when it opens. */}
         <a
           href="#top"
-          className="group font-control-tnt text-subheading text-whiteout shrink-0"
+          className="tap-safe group font-control-tnt text-subheading text-whiteout shrink-0"
         >
           <span aria-hidden="true">{identity.wordmark}</span>
           <span

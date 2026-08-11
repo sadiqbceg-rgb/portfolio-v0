@@ -70,7 +70,7 @@ export function Footer() {
               page to a form is friction, not navigation. */}
           <a
             href={`mailto:${identity.email}`}
-            className="group inline-flex w-fit items-baseline gap-3 border-b-2 border-whiteout/25 pb-2 transition-colors hover:border-whiteout focus-visible:border-whiteout"
+            className="tap-safe group inline-flex w-fit items-baseline gap-3 border-b-2 border-whiteout/25 pb-2 transition-colors hover:border-whiteout focus-visible:border-whiteout"
           >
             <span className="font-control-tnt text-heading text-whiteout">
               {footer.ctaLabel}
@@ -99,7 +99,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative inline-block text-body text-whiteout/70 transition-colors hover:text-whiteout focus-visible:text-whiteout"
+                  className="tap-safe group relative inline-block text-body text-whiteout/70 transition-colors hover:text-whiteout focus-visible:text-whiteout"
                 >
                   {social.label}
                   {/* Wipes in from the left on hover — a transform, so it
