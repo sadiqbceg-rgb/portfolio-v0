@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { Artwork, type ArtVariant } from './Artwork';
@@ -18,6 +19,12 @@ import { Artwork, type ArtVariant } from './Artwork';
  * Only the active payload is mounted. Cross-fading eight canvases or eight
  * images simultaneously would be wasteful; the exit animation is what makes
  * the swap read as a dissolve rather than a cut.
+ *
+ * A named image that fails to load falls back to the generative canvas instead
+ * of leaving a broken frame. Filenames are the fragile part of this section —
+ * a space, a capital letter, or a `/public` prefix left in the path all
+ * produce a 404, and on a dark background an empty image box is easy to miss.
+ * The failure is logged with the path it tried so it is findable.
  * ==========================================================================*/
 
 export type MediaItem = {
@@ -36,8 +43,13 @@ export function StickyMedia({
   className?: string;
 }) {
   const reduced = useReducedMotion();
+  // Keyed by src, so fixing a filename and reloading clears the failure, and
+  // one bad path never suppresses a different project's working image.
+  const [failed, setFailed] = useState<Record<string, true>>({});
   const item = items[activeIndex];
   if (!item) return null;
+
+  const src = item.image && !failed[item.image] ? item.image : undefined;
 
   return (
     <div className={`card-image relative aspect-[16/11] w-full ${className}`}>
@@ -53,13 +65,19 @@ export function StickyMedia({
         }}
         className="absolute inset-0"
       >
-        {item.image ? (
+        {src ? (
           <Image
-            src={item.image}
+            src={src}
             alt={`${item.title} — project visual`}
             fill
             sizes="(min-width: 1000px) 44vw, 100vw"
             className="object-cover"
+            onError={() => {
+              console.warn(
+                `[work] image failed to load: ${src} — check that the file exists in public${src} and that the name matches exactly (case included). Falling back to generated artwork.`,
+              );
+              setFailed((prev) => ({ ...prev, [src]: true }));
+            }}
             /* Deliberately NOT priority. This component is instantiated once
              * per project for the mobile stack plus once for the desktop
              * sticky column, so any priority rule here fires for every copy —

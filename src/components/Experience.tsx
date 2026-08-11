@@ -58,6 +58,13 @@ export function Experience() {
                     <h3 className="font-control-tnt text-subheading text-whiteout">
                       {job.company}
                     </h3>
+                    {/* Optional — older roles carry no location, and an empty
+                        line would leave a gap in the rail's rhythm. */}
+                    {job.location ? (
+                      <p className="text-caption text-whiteout/55">
+                        {job.location}
+                      </p>
+                    ) : null}
                     <p className="text-caption tabular-nums text-whiteout/55">
                       {job.period}
                     </p>

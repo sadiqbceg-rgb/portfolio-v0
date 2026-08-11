@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'motion/react';
 import { Artwork } from './Artwork';
+import { RichText } from './RichText';
 import { SectionHeader } from './SectionHeader';
 import { useScene, useSceneRange } from './ScrollScene';
 import { about, identity } from '@/content/site';
@@ -47,9 +48,15 @@ export function About() {
                   delay: reduced ? 0 : i * 0.08,
                   ease: [0.22, 1, 0.36, 1],
                 }}
-                className="prose-longform text-body max-w-[62ch] text-whiteout/75"
+                /* Emphasis is set on the paragraph rather than globally: body
+                   copy runs at 75% white so it sits behind the headings, and a
+                   <strong> that only changed weight would barely register
+                   against that. Full-strength white is what makes it read.
+                   Scoping it here keeps the rule correct — the same markup on
+                   the light panel would need the opposite colour. */
+                className="prose-longform text-body max-w-[62ch] text-whiteout/75 [&_strong]:font-medium [&_strong]:text-whiteout"
               >
-                {paragraph}
+                <RichText text={paragraph} />
               </motion.p>
             ))}
           </div>

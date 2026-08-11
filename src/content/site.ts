@@ -125,16 +125,25 @@ export const hero = {
 /* ---------------------------------------------------------------------------
  * INTRO — the light panel that rises over the hero.
  *
- * `title` is the positioning line. The one below is not new information: it is
- * `identity.role` and `hero.subhead` compressed into something short enough to
- * set at display size. Rewrite it in your own voice when you have a sharper
- * one — it is the first full sentence a visitor reads. Empty is also valid;
- * the panel then leads with the companies instead.
+ * Two movements: what gets built, then how it gets built. The panel is the
+ * first thing a visitor reads after the hero, so it stays to two short blocks.
+ *
+ * `steps` are rendered joined by arrows, so the line reads
+ * "Research → Prototype → Build → Test → Ship". Keeping them as separate
+ * strings rather than one baked sentence is what lets each stage reveal in
+ * sequence as the section scrolls past.
  * -------------------------------------------------------------------------*/
 
 export const intro = {
-  eyebrow: 'What I do',
-  title: 'I work where machine learning meets product.',
+  build: {
+    eyebrow: 'What I build',
+    statement: 'I turn complex ideas into simple, useful digital products.',
+  },
+
+  process: {
+    eyebrow: 'How I work',
+    steps: ['Research', 'Prototype', 'Build', 'Test', 'Ship'],
+  },
 };
 
 /* ---------------------------------------------------------------------------
@@ -176,28 +185,51 @@ export type WorkItem = {
 };
 
 /**
- * A note on `image`, because it will be tempting to put the old files back.
+ * HOW TO ATTACH AN IMAGE TO A PROJECT
  *
- * This list previously carried eight images under /public/work. Every one was
- * a third-party asset pulled off the web, and they were removed together:
+ * Put the file in `public/work/`, then set `image` on that item to the path
+ * WITHOUT the `public` prefix:
  *
- *   - Two showed identifiable people who never agreed to appear here. One was
- *     a stock portrait with a face-mesh overlay; the other paired a composite
- *     sketch with what appears to be a booking photo.
- *   - Four were other companies' trademarks — Discord's marketing artwork,
- *     the Google Pay and BookMyShow logos, a Rapido office photo.
- *   - One carried "2023 Rawpixel Ltd." in its EXIF copyright field.
- *   - One was a Zostel promotional photo, visible watermark included, on a
- *     project that has nothing to do with Zostel.
+ *     public/work/it-solutions.jpeg   ->   image: '/work/it-solutions.jpeg'
  *
- * None of them showed work by the author, which is the only thing a portfolio
- * image is for. With `image` absent, the generative `Artwork` canvas renders
- * instead: on-brand, rights-clean, and consistent across the set.
+ * `public` is the web root, so it never appears in the URL. That is the whole
+ * rule, and getting it wrong is the usual reason an image "does not show".
  *
- * The right replacement is a screenshot of the actual artefact — a wireframe
- * frame, an app screen, a page from the linked PDF. One line per item.
+ * Use web-safe filenames: lowercase, hyphens, no spaces. A space has to be
+ * percent-encoded (`it%20solutions.jpeg`) and survives a local dev server but
+ * not reliably every CDN, so it is not worth the risk.
+ *
+ * Filenames are case-sensitive once deployed, even though Windows will happily
+ * serve `IT-Solutions.JPEG` for `it-solutions.jpeg` locally. Match the case
+ * exactly.
+ *
+ * Leave `image` off and the generative `Artwork` canvas renders instead, keyed
+ * to `art`. If a file is named here but missing at runtime, the card falls
+ * back to that same canvas rather than showing a broken image — check the
+ * browser console, where the failure is logged with the path it tried.
  */
 const workItems: WorkItem[] = [
+  {
+    title: 'Building Complete IT Systems',
+    summary:
+      'Planning, configuring, and supporting complete IT environments — from network infrastructure and security systems to storage, connectivity, and workplace technology.',
+    tag: 'Complete IT Solutions',
+    stack: [
+      'Networking',
+      'CCTV',
+      'Firewall',
+      'NAS',
+      'Access Control',
+      'IT Support',
+    ],
+    art: 'lattice',
+    image: '/work/it-solutions.jpeg',
+    links: [
+      { label: 'Project Details', href: '#' },
+      { label: 'View Solutions', href: '#' },
+    ],
+  },
+
   {
     title: 'Sketch to Image Conversion',
     summary:
@@ -359,7 +391,7 @@ export const work = {
   title: 'Things I have built and explored',
 
   subtitle:
-    'A collection of machine learning projects, product case studies, UX explorations, and market research.',
+    'A collection of IT solutions, digital projects, website content, technical explorations, and product-focused work.',
 
   items: workItems,
 };
@@ -381,6 +413,8 @@ export const statement = {
 export type Job = {
   company: string;
   role: string;
+  /** Where the work happened. Omitted rather than guessed on older roles. */
+  location?: string;
   period: string;
   summary: string;
   highlights: string[];
@@ -392,6 +426,27 @@ export const experience = {
   title: 'Where I have worked',
 
   items: [
+    {
+      company: 'Freelance / Contract',
+
+      role: 'Contract IT Technician',
+
+      location: 'Mumbai, India',
+
+      period: 'Jun 2025 – Jan 2026',
+
+      summary:
+        'Provided hands-on IT support across multiple client environments, including PC setup, troubleshooting, network configuration, and on-site technical support.',
+
+      highlights: [
+        'Assembled and configured PC workstations for office environments.',
+        'Provided on-site technical support during corporate events and client engagements.',
+        'Assisted with network configuration and infrastructure setup for large office spaces.',
+        'Troubleshot hardware and software issues to ensure smooth system operation.',
+        'Delivered field-based IT support across multiple contract assignments.',
+      ],
+    },
+
     {
       company: 'Digichakra 360',
 
@@ -494,6 +549,47 @@ export const skills = {
         'Data Analysis',
       ],
     },
+
+    {
+      name: 'IT Infrastructure & Solutions',
+
+      items: [
+        'CCTV',
+        'Networking',
+        'Firewall',
+        'NAS',
+        'Servers',
+        'IP PBX',
+        'Access Control',
+        'IT Support',
+      ],
+    },
+
+    {
+      name: 'AI & Technology',
+
+      items: [
+        'AI Tools',
+        'Automation',
+        'Generative AI',
+        'AI-Assisted Development',
+        'Computer Vision',
+        'Machine Learning',
+      ],
+    },
+
+    {
+      name: 'Digital Content',
+
+      items: [
+        'Website Content',
+        'Technical Writing',
+        'Company Profiles',
+        'Service Pages',
+        'Project Documentation',
+        'Digital Content',
+      ],
+    },
   ],
 };
 
@@ -506,14 +602,22 @@ export const about = {
 
   title: 'A little more context',
 
+  /**
+   * `**double asterisks**` mark emphasis and render as <strong>. Everything
+   * else is literal text — this is not full Markdown, deliberately. One
+   * inline rule is enough for body copy, and a real parser would be a
+   * dependency plus an HTML-injection surface for no gain.
+   */
   paragraphs: [
-    'I have completed my engineering in Computer Science and have had the opportunity to work with an early-stage startup, contributing to real-world problems through technology-driven solutions.',
+    'I have completed my engineering in Computer Science and have built experience across **IT infrastructure, web development, AI technologies, digital content, and product-focused technology solutions**.',
 
-    'Over time, I have developed a strong interest in machine learning and product management. I am especially curious about how AI models work and how they can be used to build smarter and more efficient products.',
+    'Based in **Riyadh, Saudi Arabia**, I work across both technical and creative areas — from configuring **CCTV and network infrastructure** to developing websites, exploring AI tools, and creating digital and technical content.',
 
-    'With a background in Computer Science, I enjoy bridging the gap between technical feasibility and product thinking. I like turning ideas into functional, user-centric technology.',
+    'Over time, I have developed a strong interest in **AI, machine learning, automation, and modern web technologies**. I enjoy understanding how technology works and finding practical ways to use it to build smarter, more efficient solutions.',
 
-    'Outside of technology, I enjoy playing games, hiking, exploring new places, and shooting and editing videos as a creative outlet.',
+    'With a background in Computer Science, I like working across the gap between **technical implementation and product thinking**. My experience includes **IT infrastructure, networking, CCTV systems, web development, UI/UX, product thinking, AI-assisted development, and digital content creation**.',
+
+    'Outside of technology, I enjoy **playing games, hiking, exploring new places, and shooting and editing videos** as a creative outlet.',
   ],
 
   portraitAlt: 'Portrait of Gautham N Holla',
@@ -563,6 +667,13 @@ export const contact = {
  * -------------------------------------------------------------------------*/
 
 export const footer = {
+  eyebrow: "Let's connect",
+
+  /** Set as two lines so each can be uncovered separately. */
+  statement: ['Have an idea', 'worth building?'],
+
+  ctaLabel: "Let's talk",
+
   note: 'ML Engineer | Product Manager | Developer',
 
   name: 'Gautham N Holla',

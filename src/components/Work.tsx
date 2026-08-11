@@ -141,12 +141,16 @@ export function Work() {
                         {item.role}
                       </span>
                     ) : null}
-                    {item.stack?.map((tech) => (
+                    {/* The middot joins entries rather than prefixing them, so
+                        an item with a stack but no role starts on a word
+                        instead of a stray separator. */}
+                    {item.stack?.map((tech, t) => (
                       <span
                         key={tech}
                         className="text-caption text-whiteout/60"
                       >
-                        · {tech}
+                        {item.role || t > 0 ? '· ' : ''}
+                        {tech}
                       </span>
                     ))}
                   </motion.div>
